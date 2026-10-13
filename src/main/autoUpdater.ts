@@ -42,6 +42,11 @@ let checkInterval: NodeJS.Timeout | null = null
 let upToDateTimer: NodeJS.Timeout | null = null
 let started = false
 
+// The update feed is upstream Raven's GitHub releases. Following it from
+// this fork would offer to replace Sentral App with upstream Raven, so
+// updates stay off unless explicitly opted in (the updater tests do).
+const FORK_UPDATES_ENABLED = process.env.SENTRAL_ENABLE_UPDATES === '1'
+
 /**
  * electron-updater drives in-app updates on every packaged platform. macOS
  * uses Squirrel.Mac / ShipIt, which requires a Developer ID signature +
@@ -55,7 +60,7 @@ export function shouldRunElectronUpdater(opts: {
   packaged: boolean
   platform: NodeJS.Platform
 }): boolean {
-  return opts.packaged
+  return FORK_UPDATES_ENABLED && opts.packaged
 }
 
 /** Test-only: allow initAutoUpdater() to run again in the same process. */

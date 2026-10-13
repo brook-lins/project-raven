@@ -51,6 +51,9 @@ vi.mock('../logger', () => ({
   }),
 }))
 
+// Updates are off by default in this fork; these tests cover the updater itself.
+vi.hoisted(() => { process.env.SENTRAL_ENABLE_UPDATES = '1' })
+
 import { initAutoUpdater, stopAutoUpdater, shouldRunElectronUpdater, _resetForTesting } from '../autoUpdater'
 import { BrowserWindow } from 'electron'
 

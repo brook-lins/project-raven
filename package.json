@@ -1,5 +1,6 @@
 {
   "name": "project-raven",
+  "productName": "Sentral App",
   "private": true,
   "version": "2.5.0",
   "description": "Open-source AI meeting assistant with real-time transcription and intelligent suggestions, invisible to screen sharing.",
