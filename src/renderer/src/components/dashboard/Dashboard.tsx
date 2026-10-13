@@ -244,7 +244,7 @@ export function Dashboard({ initialUserProfile }: DashboardProps = {}) {
         className="flex items-center justify-center shrink-0 h-9 bg-white border-b border-gray-100 text-xs font-medium text-gray-400 select-none"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
-        {isMac ? null : 'Raven'}
+        {isMac ? null : 'Sentral App'}
       </div>
       <Header
         stealth={stealth}

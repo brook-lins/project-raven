@@ -66,7 +66,7 @@ export function OverlayToolbar({
       {/* Left: Logo + Stealth Badge */}
       <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}>
         <span className="text-lg">🐦‍⬛</span>
-        <span className="font-semibold text-white text-sm">Raven</span>
+        <span className="font-semibold text-white text-sm">Sentral App</span>
         <span
           className={`text-xs px-2 py-0.5 rounded-full font-medium ${
             stealthEnabled

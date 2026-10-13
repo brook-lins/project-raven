@@ -74,9 +74,9 @@ export function ChatTab() {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-8">
         <div className="text-4xl mb-3">🐦‍⬛</div>
-        <h3 className="text-white/90 font-medium mb-2">Chat with Raven</h3>
+        <h3 className="text-white/90 font-medium mb-2">Chat with Sentral App</h3>
         <p className="text-white/50 text-sm max-w-[280px]">
-          Use the quick actions below or type a question. Raven will help based on your live conversation.
+          Use the quick actions below or type a question. Sentral App will help based on your live conversation.
         </p>
       </div>
     );
@@ -98,7 +98,7 @@ export function ChatTab() {
           >
             {msg.role === 'assistant' && (
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-xs font-medium text-cyan-400">Raven</span>
+                <span className="text-xs font-medium text-cyan-400">Sentral App</span>
               </div>
             )}
             <div className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -115,7 +115,7 @@ export function ChatTab() {
         <div className="flex justify-start">
           <div className="max-w-[85%] rounded-2xl rounded-bl-md px-4 py-2.5 bg-white/10 text-white/90">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-xs font-medium text-cyan-400">Raven</span>
+              <span className="text-xs font-medium text-cyan-400">Sentral App</span>
             </div>
             {isLoading && !streamingMessage ? (
               <div className="flex items-center gap-2 text-white/50 text-sm py-1">

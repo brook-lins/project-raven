@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent
 } from 'react'
-import ravenLogo from '../../../../../logo/raven.svg'
+import ravenLogo from '../../../../../logo/sentral-glyph-white.png'
 import incognitoIcon from '../../assets/incognito.svg'
 
 interface ControllerPillProps {
@@ -111,7 +111,7 @@ export function ControllerPill({
       >
         <img
           src={ravenLogo}
-          alt="Raven"
+          alt="Sentral App"
           className="w-8 h-8 object-contain opacity-100"
           draggable={false}
         />
@@ -207,7 +207,7 @@ export function ControllerPill({
       <button
         onClick={onToggleStealth}
         onMouseEnter={(e) =>
-          showTooltip(stealthEnabled ? 'Raven is Undetectable' : 'Raven is Detectable', e.currentTarget)
+          showTooltip(stealthEnabled ? 'Sentral App is Undetectable' : 'Sentral App is Detectable', e.currentTarget)
         }
         onMouseLeave={clearTooltipHideTimer}
         className={`w-8 h-8 flex items-center justify-center rounded-full border shadow-[0_-1px_0_0_rgba(255,255,255,0.3),0_17px_5px_0_transparent,0_11px_4px_0_rgba(0,0,0,0.01),0_6px_4px_0_rgba(0,0,0,0.05),0_3px_3px_0_rgba(0,0,0,0.09),0_1px_1px_0_rgba(0,0,0,0.1)] transform-gpu transition-all duration-150 active:scale-[0.97] outline-none focus:outline-none ${

@@ -171,14 +171,14 @@ describe('parseSttProviderPreference', () => {
 })
 
 describe('sanitizeKeyterms', () => {
-  it('always prepends Raven and dedupes case-insensitively', () => {
-    expect(sanitizeKeyterms(['raven', 'Zoom', 'Raven'])).toEqual(['Raven', 'Zoom'])
+  it('always prepends the brand term and dedupes case-insensitively', () => {
+    expect(sanitizeKeyterms(['sentral', 'Zoom', 'Sentral'])).toEqual(['Sentral', 'Zoom'])
   })
 
   it('caps at 100 terms', () => {
     const many = Array.from({ length: 120 }, (_, i) => `term-${i}`)
     expect(sanitizeKeyterms(many)).toHaveLength(100)
-    expect(sanitizeKeyterms(many)[0]).toBe('Raven')
+    expect(sanitizeKeyterms(many)[0]).toBe('Sentral')
   })
 })
 

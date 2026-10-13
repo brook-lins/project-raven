@@ -21,7 +21,7 @@ export {
   type SttProviderPreference,
 } from '../../shared/sttCapabilities'
 
-export const MANDATORY_KEYTERMS = ['Raven'] as const
+export const MANDATORY_KEYTERMS = ['Sentral'] as const
 export const MAX_KEYTERMS = 100
 
 export function sanitizeKeyterms(userTerms: readonly string[] | undefined): string[] {

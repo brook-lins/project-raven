@@ -124,7 +124,7 @@ export class AudioManager {
       const body = hintsAtPermission
         ? process.platform === 'win32'
           ? 'The audio capture process stopped. Check Windows Settings → Privacy & security → Microphone, then try recording again.'
-          : 'The audio capture process stopped. This usually means macOS revoked Screen Recording or Microphone access for Raven. Check System Settings → Privacy & Security and re-grant, then restart the app.'
+          : 'The audio capture process stopped. This usually means macOS revoked Screen Recording or Microphone access for Sentral App. Check System Settings → Privacy & Security and re-grant, then restart the app.'
         : 'The audio capture process exited unexpectedly and the session was stopped. Check the app logs for details.'
 
       log.error('Capture died mid-session:', reason)
@@ -215,7 +215,7 @@ export class AudioManager {
           openMicrophonePreferences()
           return {
             success: false,
-            error: 'Microphone access is turned off for Raven. In Windows Settings -> Privacy & security -> Microphone, enable "Let desktop apps access your microphone", then try again.',
+            error: 'Microphone access is turned off for Sentral App. In Windows Settings -> Privacy & security -> Microphone, enable "Let desktop apps access your microphone", then try again.',
           }
         }
       }
@@ -832,7 +832,7 @@ export class AudioManager {
       log.warn(`Audio silence watchdog tripped - no chunks for ~${elapsedSec}s`)
       this.broadcastWarning(
         'Audio has gone quiet',
-        `No audio has reached Raven in about ${durationLabel}. If this is unexpected, try stopping and restarting the recording.`,
+        `No audio has reached Sentral App in about ${durationLabel}. If this is unexpected, try stopping and restarting the recording.`,
       )
     }, AUDIO_SILENCE_CHECK_INTERVAL_MS)
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import ravenFullLogo from '../../../../logo/raven_full.svg'
+import { BrandLockup } from './BrandLockup'
 import { createLogger } from '../lib/logger'
 import { detectMacPlatform } from '../lib/shortcutLabels'
 import { shouldOpenAccessibilitySettingsAfterPrompt } from '../../../shared/macAccessibilityGrant'
@@ -109,7 +109,7 @@ export function PermissionsGate({ onAllGranted }: PermissionsGateProps): JSX.Ele
         />
       )}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <img src={ravenFullLogo} alt="Raven" className="h-6" />
+        <BrandLockup size={22} />
         <span className="text-xs text-gray-400">Permissions needed</span>
       </div>
 
@@ -119,8 +119,8 @@ export function PermissionsGate({ onAllGranted }: PermissionsGateProps): JSX.Ele
             <h1 className="text-xl font-semibold text-gray-900 mb-1">Grant permissions to continue</h1>
             <p className="text-sm text-gray-500">
               {isWindows
-                ? 'Raven needs microphone access to capture your voice. Windows Settings may have turned it off for desktop apps.'
-                : 'Raven needs these macOS permissions to capture audio and detect meetings. It looks like one or more have been revoked since you set Raven up.'}
+                ? 'Sentral App needs microphone access to capture your voice. Windows Settings may have turned it off for desktop apps.'
+                : 'Sentral App needs these macOS permissions to capture audio and detect meetings. It looks like one or more have been revoked since you set Sentral App up.'}
             </p>
           </div>
 
@@ -173,7 +173,7 @@ export function PermissionsGate({ onAllGranted }: PermissionsGateProps): JSX.Ele
                     onClick={() => window.raven.relaunchApp()}
                     className="text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-md transition-colors"
                   >
-                    Quit &amp; Reopen Raven
+                    Quit &amp; Reopen Sentral App
                   </button>
                 </div>
               </div>

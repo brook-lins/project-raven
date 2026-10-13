@@ -9,7 +9,7 @@ export function HotkeysTab() {
       title: 'General',
       shortcuts: [
         {
-          action: 'Toggle visibility of Raven',
+          action: 'Toggle visibility of Sentral App',
           icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8V6a2 2 0 012-2h2M3 16v2a2 2 0 002 2h2m10-16h2a2 2 0 012 2v2m0 8v2a2 2 0 01-2 2h-2" />
@@ -18,7 +18,7 @@ export function HotkeysTab() {
           keys: [cmdKey, '\\'],
         },
         {
-          action: 'Ask Raven for help',
+          action: 'Ask Sentral App for help',
           icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
@@ -117,7 +117,7 @@ export function HotkeysTab() {
       <div>
         <h3 className="text-lg font-semibold text-gray-900">Keyboard shortcuts</h3>
         <p className="text-sm text-gray-500 mt-1">
-          Raven works with these easy to remember commands.
+          Sentral App works with these easy to remember commands.
         </p>
       </div>
 

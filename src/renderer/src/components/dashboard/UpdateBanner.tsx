@@ -59,7 +59,7 @@ export function UpdateBanner() {
       <div className="shrink-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="flex items-center gap-2.5 min-w-0">
           <Sparkles size={16} className="shrink-0" />
-          <span className="text-sm font-medium">Raven {updateState.version} is available</span>
+          <span className="text-sm font-medium">Sentral App {updateState.version} is available</span>
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-3">
           <button
@@ -87,7 +87,7 @@ export function UpdateBanner() {
         <Download size={16} className="text-blue-500 shrink-0 animate-pulse" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between text-xs text-blue-700 mb-1">
-            <span className="font-medium">Downloading Raven{versionLabel}...</span>
+            <span className="font-medium">Downloading Sentral App{versionLabel}...</span>
             <span className="text-blue-500">{progress}%</span>
           </div>
           <div className="w-full h-1 bg-blue-100 rounded-full overflow-hidden">
@@ -108,7 +108,7 @@ export function UpdateBanner() {
         <div className="flex items-center gap-2.5 min-w-0">
           <Download size={16} className="shrink-0" />
           <span className="text-sm font-medium">
-            {versionLabel ? `Raven${versionLabel} is ready to install` : 'Update is ready to install'}
+            {versionLabel ? `Sentral App${versionLabel} is ready to install` : 'Update is ready to install'}
           </span>
         </div>
         <button

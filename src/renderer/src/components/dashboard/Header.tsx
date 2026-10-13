@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { ModeEditorModal } from './ModeEditorModal'
 import { Eye, EyeOff, Settings, MessageSquarePlus, Layers, Search, FileText, Power, RefreshCw, WifiOff, Sparkles } from 'lucide-react'
-import ravenFullLogo from '../../../../../logo/raven_full.svg'
-import ravenLogo from '../../../../../logo/raven.svg'
+import { BrandLockup } from '../BrandLockup'
+import ravenLogo from '../../../../../logo/sentral-glyph-white.png'
 
 interface SearchResult {
   id: string
@@ -148,12 +148,7 @@ export function Header({ stealth, onToggleStealth, onStartRaven, isRecording, on
       <header className="relative z-50 flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white backdrop-blur-md">
         {/* Left section - Logo */}
         <div className="flex items-center">
-          <img
-            src={ravenFullLogo}
-            alt="Raven"
-            className="h-7 object-contain"
-            draggable={false}
-          />
+          <BrandLockup size={24} />
         </div>
 
         {/* Center section - Search trigger (absolutely centered) */}
@@ -200,7 +195,7 @@ export function Header({ stealth, onToggleStealth, onStartRaven, isRecording, on
               {stealth ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-              {stealth ? 'Raven is Undetectable' : 'Raven is Detectable'}
+              {stealth ? 'Sentral App is Undetectable' : 'Sentral App is Detectable'}
             </div>
           </div>
 
@@ -223,8 +218,8 @@ export function Header({ stealth, onToggleStealth, onStartRaven, isRecording, on
               onClick={onStartRaven}
               className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white shadow-sm transition-all"
             >
-              <img src={ravenLogo} alt="" className="w-4 h-4 brightness-0 invert" draggable={false} />
-              <span>Start Raven</span>
+              <img src={ravenLogo} alt="" className="w-4 h-4 object-contain" draggable={false} />
+              <span>Start Sentral App</span>
             </button>
           )}
 
@@ -265,7 +260,7 @@ export function Header({ stealth, onToggleStealth, onStartRaven, isRecording, on
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">
-                      {displayName || 'Raven User'}
+                      {displayName || 'Sentral App User'}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5 truncate">
                       {userEmail || 'Local account'}
@@ -327,7 +322,7 @@ export function Header({ stealth, onToggleStealth, onStartRaven, isRecording, on
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
                   >
                     <Power size={16} className="text-red-400 shrink-0" />
-                    <span>Quit Raven</span>
+                    <span>Quit Sentral App</span>
                   </button>
                 </div>
               </div>

@@ -202,7 +202,7 @@ export function buildSessionHtml(data: SessionExportData): string {
   ${actionItemsHtml}
   ${summaryHtml}
   ${transcriptHtml}
-  <div class="footer">Exported from Raven</div>
+  <div class="footer">Exported from Sentral App</div>
 </body>
 </html>`
 }

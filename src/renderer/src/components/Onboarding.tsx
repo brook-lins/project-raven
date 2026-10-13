@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Key, Shield, Keyboard, ExternalLink, ArrowRight, ArrowLeft, Check, Loader2, Eye, EyeOff, Sparkles } from 'lucide-react'
-import ravenFullLogo from '../../../../logo/raven_full.svg'
+import { BrandLockup } from './BrandLockup'
 import { OverlayTour } from './OverlayTour'
 import { detectMacPlatform, shortcutKeycaps } from '../lib/shortcutLabels'
 import { shouldOpenAccessibilitySettingsAfterPrompt } from '../../../shared/macAccessibilityGrant'
@@ -307,12 +307,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             {/* Step 1: Welcome */}
             {step === 1 && (
               <div className="text-center">
-                <img
-                  src={ravenFullLogo}
-                  alt="Raven"
-                  className="h-10 mx-auto mb-5 object-contain"
-                  draggable={false}
-                />
+                <BrandLockup size={36} className="mb-5" />
 
                 <p className="text-gray-500 text-sm leading-relaxed max-w-sm mx-auto mb-6">
                   Real-time transcription and AI suggestions for your meetings while being invisible to screen sharing.
@@ -604,7 +599,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <div className="text-center mb-1">
                   <h2 className="text-lg font-semibold text-gray-900 mb-0.5">Permissions</h2>
                   <p className="text-xs text-gray-500">
-                    Raven needs these permissions to work properly.
+                    Sentral App needs these permissions to work properly.
                   </p>
                 </div>
 
@@ -673,7 +668,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                           onClick={() => window.raven.relaunchApp()}
                           className="text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-md transition-colors"
                         >
-                          Quit & Reopen Raven
+                          Quit & Reopen Sentral App
                         </button>
                       </div>
                     </div>
@@ -769,7 +764,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
                 <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3">
                   {[
-                    { keys: shortcutKeycaps('visibility', isMac), label: 'Show / Hide Overlay', description: 'Toggle Raven visibility anytime' },
+                    { keys: shortcutKeycaps('visibility', isMac), label: 'Show / Hide Overlay', description: 'Toggle Sentral App visibility anytime' },
                     { keys: shortcutKeycaps('assist', isMac), label: 'AI Assist', description: 'Screenshot + transcript analysis' },
                     { keys: shortcutKeycaps('recording', isMac), label: 'Start / Stop Session', description: 'Begin or end a recording' },
                     { keys: shortcutKeycaps('clear', isMac), label: 'Clear Conversation', description: 'Reset the AI conversation' },
@@ -936,7 +931,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       </>
                     ) : (
                       <>
-                        Launch Raven
+                        Launch Sentral App
                         <ArrowRight size={15} />
                       </>
                     )}

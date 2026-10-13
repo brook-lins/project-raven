@@ -37,7 +37,7 @@ function buildContextMenu(): Menu {
   if (isOnboarding) {
     return Menu.buildFromTemplate([
       {
-        label: 'Quit Raven',
+        label: 'Quit Sentral App',
         click: () => app.quit(),
       },
     ])
@@ -64,7 +64,7 @@ function buildContextMenu(): Menu {
     },
     { type: 'separator' },
     {
-      label: 'Quit Raven',
+      label: 'Quit Sentral App',
       click: () => app.quit(),
     },
   ])
@@ -84,7 +84,7 @@ export function createTray(): void {
       tray = new Tray(icon)
     }
 
-    tray.setToolTip('Raven')
+    tray.setToolTip('Sentral App')
     tray.setContextMenu(buildContextMenu())
 
     // On Windows/Linux, left-clicking the tray icon is the natural way
@@ -113,7 +113,7 @@ export function updateTrayRecordingState(recording: boolean): void {
       tray.setImage(icon)
     }
     tray.setContextMenu(buildContextMenu())
-    tray.setToolTip(recording ? 'Raven (Recording)' : 'Raven')
+    tray.setToolTip(recording ? 'Sentral App (Recording)' : 'Sentral App')
   } catch (err) {
     log.error('Failed to update tray state:', err)
   }

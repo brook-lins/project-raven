@@ -39,7 +39,7 @@ export function buildFollowupEmailPrompt(params: FollowupEmailParams): string {
 HARD RULES:
 - Base the email ONLY on what was actually discussed in the notes and transcript below. Do not invent commitments, names, dates, numbers, or facts that are not present.
 - If the notes are thin, keep the email short rather than padding it with invented detail.
-- Write from the sender's first-person point of view ("I", "we"). Do not address it from Raven.
+- Write from the sender's first-person point of view ("I", "we"). Do not address it from Sentral App.
 
 INCLUDE:
 - A one or two sentence thank-you / recap opener.

@@ -7,7 +7,7 @@
  *
  * Unsigned packs (`identity=null` / CSC_IDENTITY_AUTO_DISCOVERY=false)
  * leave Electron's default adhoc signature (Identifier=Electron,
- * Info.plist not bound). TCC then shows a "Raven" row in Screen
+ * Info.plist not bound). TCC then shows a "Sentral App" row in Screen
  * Recording while getMediaAccessStatus('screen') stays denied. Re-sign
  * the .app adhoc with our bundle id so the plist is bound. Helpers are
  * left alone (no --deep).
@@ -19,7 +19,7 @@ const { execFileSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
-const BUNDLE_ID = 'com.laxcorpresearch.raven'
+const BUNDLE_ID = 'com.sentralgroup.sentralapp'
 
 /**
  * True when electron-builder will not apply a Developer ID signature.

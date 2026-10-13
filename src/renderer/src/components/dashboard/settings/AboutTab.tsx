@@ -17,13 +17,13 @@ export function AboutTab() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.15),transparent_60%)]" />
         <div className="relative flex items-center gap-4">
           <img
-            src={new URL('../../../../../../logo/raven.svg', import.meta.url).href}
-            alt="Raven"
+            src={new URL('../../../../../../logo/sentral-app-icon.png', import.meta.url).href}
+            alt="Sentral App"
             className="w-14 h-14 drop-shadow-lg"
             draggable={false}
           />
           <div>
-            <h2 className="text-lg font-bold text-white">Raven</h2>
+            <h2 className="text-lg font-bold text-white">Sentral App</h2>
             <p className="text-sm text-white/50 mt-0.5">v{appVersion}</p>
           </div>
         </div>

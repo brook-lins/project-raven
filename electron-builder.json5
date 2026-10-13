@@ -1,19 +1,19 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.laxcorpresearch.raven",
+  "appId": "com.sentralgroup.sentralapp",
   "asar": true,
   "asarUnpack": [
     "**/*.node",
     "**/audiocapture"
   ],
-  "productName": "Raven",
+  "productName": "Sentral App",
   "directories": {
     "output": "release/${version}"
   },
   "protocols": [
     {
-      "name": "Raven",
+      "name": "Sentral App",
       "schemes": ["raven"]
     }
   ],

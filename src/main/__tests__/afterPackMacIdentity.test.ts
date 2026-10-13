@@ -38,16 +38,16 @@ describe('scripts/afterPack-mac-identity.cjs', () => {
     existsSync = vi.fn(() => true)
   })
 
-  it('uses the Raven bundle id, not Electron', () => {
-    expect(hook._BUNDLE_ID).toBe('com.laxcorpresearch.raven')
+  it('uses the Sentral App bundle id, not Electron', () => {
+    expect(hook._BUNDLE_ID).toBe('com.sentralgroup.sentralapp')
   })
 
   it('adhoc-signs the .app with --identifier and without --deep', () => {
-    hook._adhocSignMacApp('/tmp/Raven.app', { execFileSync, existsSync })
+    hook._adhocSignMacApp('/tmp/Sentral App.app', { execFileSync, existsSync })
 
     expect(execFileSync).toHaveBeenCalledWith(
       'codesign',
-      ['--force', '--sign', '-', '--identifier', 'com.laxcorpresearch.raven', '/tmp/Raven.app'],
+      ['--force', '--sign', '-', '--identifier', 'com.sentralgroup.sentralapp', '/tmp/Sentral App.app'],
       expect.any(Object),
     )
     const args = execFileSync.mock.calls[0][1] as string[]

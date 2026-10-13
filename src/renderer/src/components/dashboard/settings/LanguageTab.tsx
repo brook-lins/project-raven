@@ -437,7 +437,7 @@ export function LanguageTab() {
         )}
 
         <p className="text-xs text-gray-500">
-          &quot;Raven&quot; is always included automatically - you don&apos;t need to add it.
+          &quot;Sentral&quot; is always included automatically - you don&apos;t need to add it.
         </p>
       </div>
     </div>

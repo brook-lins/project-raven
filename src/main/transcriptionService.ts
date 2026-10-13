@@ -119,12 +119,12 @@ export class TranscriptionService {
       // Inject keyterms (brand name + user vocabulary) for nova-3's
       // Keyword Prompting feature. Free-tier path talks directly to
       // Deepgram so we can't share the backend's sanitizer - replicate
-      // the mandatory-"Raven"-first + dedupe + 100-cap contract here.
+      // the mandatory-"Sentral"-first + dedupe + 100-cap contract here.
       const vocabString = (getSetting('vocabulary' as keyof import('./store').LocalSettings) as string) || '';
       const userTerms = vocabString.split(',').map((t) => t.trim()).filter((t) => t.length > 0);
       const seen = new Set<string>();
       const finalTerms: string[] = [];
-      for (const term of ['Raven', ...userTerms]) {
+      for (const term of ['Sentral', ...userTerms]) {
         const key = term.toLowerCase();
         if (seen.has(key)) continue;
         seen.add(key);

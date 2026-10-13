@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ChevronUp, Eye, EyeOff, Pin } from 'lucide-react'
-import ravenLogo from '../../../../../logo/raven.svg'
+import ravenLogo from '../../../../../logo/sentral-glyph-white.png'
 import incognitoIcon from '../../assets/incognito.svg'
 
 export interface NotchRect {
@@ -202,7 +202,7 @@ export function NotchIsland({
                   type="button"
                   onClick={() => setPinned((p) => !p)}
                   className="flex items-center gap-2 h-full text-white/90"
-                  aria-label={pinned ? 'Collapse Raven' : 'Keep Raven open'}
+                  aria-label={pinned ? 'Collapse Sentral App' : 'Keep Sentral App open'}
                   title={pinned ? 'Collapse' : 'Keep open'}
                 >
                   <span className="relative flex w-2 h-2 shrink-0">
@@ -220,10 +220,10 @@ export function NotchIsland({
                   className="flex items-center gap-1.5 h-full text-white/80 hover:text-white transition-colors"
                   style={{ opacity: open ? 1 : 0, transition: 'opacity 160ms ease' }}
                   tabIndex={open ? 0 : -1}
-                  title="Open Raven"
+                  title="Open Sentral App"
                 >
                   <img src={ravenLogo} alt="" className="w-[18px] h-[18px] object-contain" draggable={false} />
-                  <span className="text-[12px] font-medium tracking-tight">Raven</span>
+                  <span className="text-[12px] font-medium tracking-tight">Sentral App</span>
                 </button>
               )}
             </div>
@@ -278,7 +278,7 @@ export function NotchIsland({
                       <Pin size={13} strokeWidth={2} fill={pinned ? 'currentColor' : 'none'} />
                     </IslandButton>
                   )}
-                  <IslandButton label="Hide Raven" onClick={onHide}>
+                  <IslandButton label="Hide Sentral App" onClick={onHide}>
                     <ChevronUp size={15} strokeWidth={2.25} />
                   </IslandButton>
                 </div>

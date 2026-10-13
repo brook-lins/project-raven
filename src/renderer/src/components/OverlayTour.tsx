@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import ravenLogo from '../../../../logo/raven.svg'
+import ravenLogo from '../../../../logo/sentral-glyph-white.png'
 import incognitoIcon from '../assets/incognito.svg'
 
 interface TourStep {
@@ -53,13 +53,13 @@ const TOUR_STEPS: TourStep[] = [
     id: 'stealth-off',
     highlightId: 'stealth',
     label: 'Detectable',
-    description: 'Raven is visible to screen capture and recording software.',
+    description: 'Sentral App is visible to screen capture and recording software.',
   },
   {
     id: 'stealth-on',
     highlightId: 'stealth',
     label: 'Undetectable',
-    description: 'Raven becomes nearly invisible and is hidden from screen sharing.',
+    description: 'Sentral App becomes nearly invisible and is hidden from screen sharing.',
   },
   {
     id: 'incognito-off',
@@ -162,7 +162,7 @@ export function OverlayTour({ onBack, onNext }: OverlayTourProps) {
           {/* Logo */}
           <div className={`transition-opacity duration-300 ${dimClass('logo')}`}>
             <div className="w-8 h-8 flex items-center justify-center">
-              <img src={ravenLogo} alt="Raven" className="w-8 h-8 object-contain" draggable={false} />
+              <img src={ravenLogo} alt="Sentral App" className="w-8 h-8 object-contain" draggable={false} />
             </div>
           </div>
 

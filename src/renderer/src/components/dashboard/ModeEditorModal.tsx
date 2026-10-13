@@ -542,7 +542,7 @@ export function ModeEditorModal({ isOpen, onClose }: ModeEditorModalProps) {
     if (!formNotesTemplate) return
     setFormNotesTemplate([
       ...formNotesTemplate,
-      { id: globalThis.crypto.randomUUID(), title: 'Section title', instructions: 'Instructions for Raven' },
+      { id: globalThis.crypto.randomUUID(), title: 'Section title', instructions: 'Instructions for Sentral App' },
     ])
   }
 
@@ -662,7 +662,7 @@ export function ModeEditorModal({ isOpen, onClose }: ModeEditorModalProps) {
         <div className="flex-1 flex flex-col overflow-hidden">
           {showTemplates ? (
             <div className="flex-1 overflow-y-auto p-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Raven Modes</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sentral App Modes</h2>
               <p className="text-gray-500 mb-6">Get started by selecting a template or start from an empty mode.</p>
 
               <div className="border-t border-gray-200 pt-5 space-y-2">
@@ -897,7 +897,7 @@ export function ModeEditorModal({ isOpen, onClose }: ModeEditorModalProps) {
                               value={section.instructions}
                               onChange={(e) => handleUpdateSection(section.id, 'instructions', e.target.value)}
                               className="w-full text-sm text-gray-500 bg-transparent border-0 outline-none p-0 mt-0.5 focus:ring-0"
-                              placeholder="Instructions for Raven"
+                              placeholder="Instructions for Sentral App"
                             />
                           </div>
 

@@ -655,11 +655,11 @@ export function OverlayWindow() {
       pushNotification({
         id,
         title: 'Meeting detected',
-        body: `Start Raven for your ${platformLabel} meeting?`,
+        body: `Start Sentral App for your ${platformLabel} meeting?`,
         type: 'meeting',
         autoDismissMs: 15000,
         action: {
-          label: 'Start Raven',
+          label: 'Start Sentral App',
           onClick: () => {
             dismissNotification(id)
             void handleToggleRecording()
@@ -694,7 +694,7 @@ export function OverlayWindow() {
         ...prev,
         {
           id: `ai-timeout-${Date.now()}`,
-          content: 'Raven did not start a reply. Check the AI API key in Settings, then try again.',
+          content: 'Sentral App did not start a reply. Check the AI API key in Settings, then try again.',
           action: 'Error',
           badgeVariant: 'system',
           hasScreenshot: false,
@@ -736,7 +736,7 @@ export function OverlayWindow() {
         ...prev,
         {
           id: `ai-fail-${Date.now()}`,
-          content: error instanceof Error ? error.message : 'Could not reach Raven. Try again.',
+          content: error instanceof Error ? error.message : 'Could not reach Sentral App. Try again.',
           action: 'Error',
           badgeVariant: 'system',
           hasScreenshot: false,

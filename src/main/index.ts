@@ -284,12 +284,12 @@ function registerGlobalHotkeys(
     const failed: string[] = []
     if (!recordingRegistered) failed.push(`${modifier}+Shift+Space (toggle recording)`)
     if (!visibilityRegistered) failed.push(`${modifier}+\\ (toggle visibility)`)
-    if (!aiRegistered) failed.push(`${modifier}+Return (ask Raven)`)
+    if (!aiRegistered) failed.push(`${modifier}+Return (ask Sentral App)`)
     const payload = {
       id: `hotkey-fail-${Date.now()}`,
       title: 'Some shortcuts are disabled',
       body: process.platform === 'darwin'
-        ? `Couldn't register ${failed.join(', ')}. Grant Raven Accessibility permission in System Settings → Privacy & Security → Accessibility, or quit the other app that owns these shortcuts.`
+        ? `Couldn't register ${failed.join(', ')}. Grant Sentral App Accessibility permission in System Settings → Privacy & Security → Accessibility, or quit the other app that owns these shortcuts.`
         : `Couldn't register ${failed.join(', ')}. Another app may already own the shortcut.`,
       type: 'warning' as const,
       autoDismissMs: 12_000,
@@ -410,6 +410,16 @@ function boot(): void {
 app.whenReady().then(() => {
   if (process.platform === 'win32') {
     Menu.setApplicationMenu(null)
+  }
+
+  // An unpackaged run is Electron.app, so the Dock shows Electron's icon
+  // unless we hand it ours.
+  if (process.platform === 'darwin' && !app.isPackaged) {
+    try {
+      app.dock?.setIcon(join(process.cwd(), 'build', 'icon.png'))
+    } catch (err) {
+      log.warn('Could not set dev Dock icon:', err)
+    }
   }
 
   saveSetting('mode', 'free')

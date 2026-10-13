@@ -132,8 +132,8 @@ export function GeneralTab() {
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
               {stealth
-                ? 'Raven is hidden from screen sharing'
-                : 'Raven is visible during screen sharing'}
+                ? 'Sentral App is hidden from screen sharing'
+                : 'Sentral App is visible during screen sharing'}
             </p>
           </div>
         </div>
@@ -154,7 +154,7 @@ export function GeneralTab() {
       {/* Section label */}
       <div>
         <h3 className="text-sm font-semibold text-gray-900">General settings</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Customize how Raven works for you</p>
+        <p className="text-xs text-gray-400 mt-0.5">Customize how Sentral App works for you</p>
       </div>
 
       {/* Settings rows */}
@@ -168,8 +168,8 @@ export function GeneralTab() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Open Raven when you log in</p>
-              <p className="text-xs text-gray-400 mt-0.5">Raven will open automatically when you log in to your computer</p>
+              <p className="text-sm font-medium text-gray-900">Open Sentral App when you log in</p>
+              <p className="text-xs text-gray-400 mt-0.5">Sentral App will open automatically when you log in to your computer</p>
             </div>
           </div>
           <button
@@ -196,7 +196,7 @@ export function GeneralTab() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Keep Raven in the notch</p>
+                <p className="text-sm font-medium text-gray-900">Keep Sentral App in the notch</p>
                 <p className="text-xs text-gray-400 mt-0.5">Dock the overlay in the MacBook camera cutout. On a display without one it floats as a movable card.</p>
               </div>
             </div>
@@ -204,7 +204,7 @@ export function GeneralTab() {
               onClick={() => handleNotchOverlay(!notchOverlay)}
               role="switch"
               aria-checked={notchOverlay}
-              aria-label="Keep Raven in the notch"
+              aria-label="Keep Sentral App in the notch"
               className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
                 notchOverlay ? 'bg-blue-600' : 'bg-gray-300'
               }`}
@@ -229,7 +229,7 @@ export function GeneralTab() {
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-900">When a meeting starts</p>
               <p className="text-xs text-gray-400 mt-0.5 mb-3">
-                Raven can notice Zoom, Google Meet, Teams, or Webex meetings and offer to start. No bot joins your call.
+                Sentral App can notice Zoom, Google Meet, Teams, or Webex meetings and offer to start. No bot joins your call.
               </p>
               <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Meeting auto-start">
                 {([
@@ -284,7 +284,7 @@ export function GeneralTab() {
                     ? `Version ${updateState.version} is ready to install`
                     : updateState.status === 'up-to-date'
                       ? `You're on the latest version (${appVersion})`
-                      : `You are currently using Raven version ${appVersion}`}
+                      : `You are currently using Sentral App version ${appVersion}`}
               </p>
             </div>
           </div>

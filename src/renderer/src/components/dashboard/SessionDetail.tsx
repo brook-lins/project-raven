@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import Markdown from 'react-markdown'
 import { useAskConversation, type AskFn, type AskConversationState } from '../../lib/useAskConversation'
-import ravenLogo from '../../../../../logo/raven.svg'
+import ravenLogo from '../../../../../logo/sentral-glyph-white.png'
 import { createLogger } from '../../lib/logger'
 import { isPlaceholderSessionTitle } from '../../../../shared/sessionDisplay'
 import { parseActionItems, type ActionItem } from '../../../../shared/actionItems'
@@ -312,7 +312,7 @@ export function SessionDetail({ session, onBack, onUpdateTitle, isRecording = fa
     if (activeTab === 'transcript') return transcriptText
     if (activeTab === 'usage') {
       return messages
-        .map((message) => `${message.role === 'user' ? userName : 'Raven'}: ${message.content}`)
+        .map((message) => `${message.role === 'user' ? userName : 'Sentral App'}: ${message.content}`)
         .join('\n\n')
     }
     if (activeTab === 'insights' && currentInsightsJson) {
@@ -1783,7 +1783,7 @@ function UsageTab({ messages, loading }: { messages: SessionMessage[]; loading: 
           </svg>
         </div>
         <p className="text-gray-500">No AI interactions yet</p>
-        <p className="text-sm text-gray-400 mt-1">Ask Raven for help during your session</p>
+        <p className="text-sm text-gray-400 mt-1">Ask Sentral App for help during your session</p>
       </div>
     )
   }
@@ -1829,7 +1829,7 @@ function UsageTab({ messages, loading }: { messages: SessionMessage[]; loading: 
           ) : (
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 flex items-center justify-center">
-                <img src={ravenLogo} alt="Raven" className="w-4 h-4" draggable={false} />
+                <img src={ravenLogo} alt="Sentral App" className="w-4 h-4 object-contain" draggable={false} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">

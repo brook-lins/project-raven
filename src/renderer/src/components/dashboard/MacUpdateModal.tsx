@@ -115,12 +115,12 @@ export function MacUpdateModal({ isRecording }: { isRecording: boolean }) {
           </div>
           <div>
             <h2 id="mac-update-title" className="text-lg font-semibold text-gray-900 leading-snug">
-              {version ? `Raven ${version} is ready` : 'An update is ready'}
+              {version ? `Sentral App ${version} is ready` : 'An update is ready'}
             </h2>
             <p className="text-sm text-gray-500 mt-1 leading-relaxed">
               {currentVersion
-                ? `This window is Raven ${currentVersion}. Install from a disk image, then open the new app from Applications.`
-                : 'On Mac, install this update from a disk image. Drag Raven into Applications, then open it.'}
+                ? `This window is Sentral App ${currentVersion}. Install from a disk image, then open the new app from Applications.`
+                : 'On Mac, install this update from a disk image. Drag Sentral App into Applications, then open it.'}
             </p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export function MacUpdateModal({ isRecording }: { isRecording: boolean }) {
             </span>
             <p className="text-sm text-gray-700 leading-relaxed pt-0.5">
               Open the <span className="font-medium">.dmg</span> and drag{' '}
-              <span className="font-medium text-gray-900">Raven</span> into{' '}
+              <span className="font-medium text-gray-900">Sentral App</span> into{' '}
               <span className="font-medium text-gray-900">Applications</span>. Choose Replace if
               macOS asks.
             </p>
@@ -151,7 +151,7 @@ export function MacUpdateModal({ isRecording }: { isRecording: boolean }) {
               3
             </span>
             <p className="text-sm text-gray-700 leading-relaxed pt-0.5">
-              Open <span className="font-medium text-gray-900">Raven</span> from Applications.
+              Open <span className="font-medium text-gray-900">Sentral App</span> from Applications.
               Quit the old copy first if macOS says it is already running.
             </p>
           </li>

@@ -183,7 +183,7 @@ export function createDashboardWindow(preloadPath: string, rendererURL: string |
     minWidth: DASHBOARD_MIN_WIDTH,
     minHeight: DASHBOARD_MIN_HEIGHT,
     show: false,
-    title: 'Raven',
+    title: 'Sentral App',
     backgroundColor: '#ffffff',
     ...(process.platform === 'darwin'
       ? {
@@ -339,7 +339,7 @@ export function createOverlayWindow(preloadPath: string, rendererURL: string | n
     hasShadow: false,
     roundedCorners: false,
     show: false,
-    title: 'Raven Overlay',
+    title: 'Sentral App Overlay',
     // Windows: keep the overlay focusable (the BrowserWindow default).
     // A focusable:false (WS_EX_NOACTIVATE) window loses setIgnoreMouseEvents
     // (forward:true) mouse-move forwarding after a hide -> re-show cycle,
