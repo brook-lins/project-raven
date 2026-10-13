@@ -339,8 +339,10 @@ node -v
 **Step 3 — Install GStreamer**
 
 ```bash
-brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad
+brew install gstreamer meson ninja cmake
 ```
+
+Homebrew's `gstreamer` formula now includes the base/good/bad plugin sets. `meson` and `ninja` build the WebRTC audio library the echo-cancellation plugin links against (Step 5 does this automatically); `cmake` builds the native addon.
 
 > Don't have Homebrew? Install it first from [brew.sh](https://brew.sh).
 
@@ -393,7 +395,7 @@ cd ../../..
 
 What this does:
 1. Installs the addon's build tools (`cmake-js`, `node-addon-api`)
-2. Verifies all GStreamer libraries and builds the WebRTC DSP plugin from source (Homebrew doesn't ship it)
+2. Verifies all GStreamer libraries, builds `libwebrtc-audio-processing` as static libraries (`build-webrtc-audio-processing.sh`), and builds the WebRTC DSP plugin from source against it (Homebrew doesn't ship the plugin)
 3. Compiles the C++ echo-cancellation native module
 
 Verify:

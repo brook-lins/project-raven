@@ -16,9 +16,8 @@ echo "Building webrtcdsp plugin for GStreamer $GST_VERSION"
 
 # Check that webrtc-audio-processing static libs exist
 if [ ! -f "$DEPS_DIR/lib/libwebrtc-audio-processing-1.a" ]; then
-    echo "ERROR: libwebrtc-audio-processing not found in $DEPS_DIR/lib/"
-    echo "Run the original build-deps.sh to build it first."
-    exit 1
+    echo "libwebrtc-audio-processing not found in $DEPS_DIR/lib/ - building it..."
+    "$SCRIPT_DIR/build-webrtc-audio-processing.sh"
 fi
 
 # Clone GStreamer monorepo (shallow, matching version)

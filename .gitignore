@@ -45,6 +45,7 @@ playwright-report/
 *.swiftdoc
 
 # Native AEC addon build artifacts
+build/gstreamer-bundle/
 src/native/aec/build/
 src/native/aec/deps/
 src/native/aec/node_modules/
