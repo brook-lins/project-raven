@@ -2,13 +2,15 @@
  * AudioManager - main process coordinator for recording lifecycle.
  * Owns the full pipeline: native capture -> AEC -> transcription.
  *
- * Native capture + AssemblyAI (if keyed), then Deepgram.
+ * Native capture, then local Whisper, or AssemblyAI (if keyed) then Deepgram.
  */
 
 import { BrowserWindow, ipcMain } from 'electron'
 import { getSetting } from './store'
 import { chooseNativeSttStrategy } from './services/transcriptProviderRouting'
 import { TranscriptionService } from './transcriptionService'
+import { LocalWhisperTranscriptionService } from './services/localWhisperTranscriptionService'
+import { isLocalWhisperAvailable } from './services/localWhisperModels'
 import { sessionManager } from './services/sessionManager'
 import { setProcessedAudioCallback, setCaptureExitCallback, startCapture, stopCapture } from './systemAudioNative'
 import { updateTrayRecordingState } from './trayManager'
@@ -52,6 +54,7 @@ export class AudioManager {
   private chunkCount = 0
   private recordingStartTime: number | null = null
   private transcriptionService: TranscriptionService
+  private whisperService: LocalWhisperTranscriptionService | null = null
   private activeProvider: TranscriptionProvider | null = null
   private usingAssemblyAI = false
   private sessionTimer: ReturnType<typeof setTimeout> | null = null
@@ -138,6 +141,7 @@ export class AudioManager {
     this.dashboardWindow = dashboard
     this.overlayWindow = overlay
     this.transcriptionService.setWindows(dashboard, overlay)
+    this.whisperService?.setWindows(dashboard, overlay)
     if (this.activeProvider && this.activeProvider !== this.transcriptionService) {
       this.activeProvider.setWindows(dashboard, overlay)
     }
@@ -227,11 +231,28 @@ export class AudioManager {
         language: getSetting('transcriptionLanguage') as string,
         hasAssemblyKey: !!getSetting('assemblyaiApiKey'),
         hasDeepgramKey: !!getSetting('deepgramApiKey'),
+        hasLocalWhisper: isLocalWhisperAvailable(),
         preferredProvider: getSetting('sttProvider'),
       })
 
       if (sttStrategy === 'assembly-retry') {
         shouldStartProRetryLoop = true
+      } else if (sttStrategy === 'whisper') {
+        const service = this.getWhisperService()
+        service.clearTranscript()
+        this.broadcastTranscriptionConnectionState({ phase: 'connecting', provider: 'whisper' })
+        const result = await service.start()
+        if (!result.success) {
+          log.error('Local Whisper failed to start:', result.error)
+          stopCapture()
+          this.broadcastTranscriptionConnectionState({ phase: 'idle', provider: null })
+          void trackRecordingFailed('local_whisper_failed_to_start')
+          return {
+            success: false,
+            error: result.error || 'Local Whisper failed to start.',
+          }
+        }
+        this.activeProvider = service
       } else if (sttStrategy === 'deepgram') {
         const deepgramKey = getSetting('deepgramApiKey')
         this.transcriptionService.setApiKey(deepgramKey)
@@ -248,12 +269,12 @@ export class AudioManager {
           }
         }
       } else {
-        log.error('No AssemblyAI or Deepgram API key - refusing to start a silent recording')
+        log.error('No local Whisper model and no AssemblyAI or Deepgram API key - refusing to start a silent recording')
         stopCapture()
         void trackRecordingFailed('no_transcription_key')
         return {
           success: false,
-          error: 'Add a Deepgram or AssemblyAI key in Settings before recording.',
+          error: 'Pick Local Whisper under Settings → Language, or add a Deepgram or AssemblyAI key, before recording.',
         }
       }
 
@@ -280,6 +301,15 @@ export class AudioManager {
           log.error('Transcription retry loop crashed:', err)
         })
       } else {
+        if (sttStrategy === 'whisper') {
+          this.broadcastTranscriptionConnectionState({
+            phase: 'connected',
+            provider: 'whisper',
+            retryCount: 0,
+            maxRetries: 3,
+            nextRetryAt: null,
+          })
+        }
         this.startSessionOnce()
       }
 
@@ -324,6 +354,23 @@ export class AudioManager {
       const provider = this.activeProvider || this.transcriptionService
       return provider.getTranscriptBySource(source)
     })
+  }
+
+  private getWhisperService(): LocalWhisperTranscriptionService {
+    if (!this.whisperService) {
+      const service = new LocalWhisperTranscriptionService()
+      service.setWindows(this.dashboardWindow, this.overlayWindow)
+      service.setExitHandler((detail) => {
+        if (!this.isRecording || this.activeProvider !== service) return
+        log.error('Local Whisper helper died mid-session:', detail)
+        this.broadcastError('Recording stopped', 'The on-device transcription helper exited unexpectedly and the session was stopped. Check the app logs for details.')
+        this.stopRecordingInternal({ reason: 'TRANSCRIPTION_FAILED' }).catch((err) =>
+          log.error('Failed to stop after Whisper helper death:', err),
+        )
+      })
+      this.whisperService = service
+    }
+    return this.whisperService
   }
 
   private startSessionOnce(): void {
@@ -375,7 +422,7 @@ export class AudioManager {
 
   private broadcastTranscriptionConnectionState(payload: {
     phase: 'idle' | 'connecting' | 'retrying' | 'connected' | 'failed'
-    provider?: 'recall' | 'assemblyai' | 'deepgram' | null
+    provider?: 'recall' | 'assemblyai' | 'deepgram' | 'whisper' | null
     retryCount?: number
     maxRetries?: number
     nextRetryAt?: number | null

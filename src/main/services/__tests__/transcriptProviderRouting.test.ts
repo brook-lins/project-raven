@@ -38,6 +38,44 @@ describe('pickTranscriptProvider', () => {
 })
 
 describe('chooseNativeSttStrategy', () => {
+  it('uses local Whisper when preferred and available, even with cloud keys', () => {
+    expect(chooseNativeSttStrategy({
+      language: 'en',
+      hasAssemblyKey: true,
+      hasDeepgramKey: true,
+      hasLocalWhisper: true,
+      preferredProvider: 'whisper',
+    })).toBe('whisper')
+  })
+
+  it('falls back to cloud routing when Whisper is preferred but not available', () => {
+    expect(chooseNativeSttStrategy({
+      language: 'hi',
+      hasAssemblyKey: false,
+      hasDeepgramKey: true,
+      hasLocalWhisper: false,
+      preferredProvider: 'whisper',
+    })).toBe('deepgram')
+  })
+
+  it('uses local Whisper on auto when no cloud key exists', () => {
+    expect(chooseNativeSttStrategy({
+      language: 'en',
+      hasAssemblyKey: false,
+      hasDeepgramKey: false,
+      hasLocalWhisper: true,
+    })).toBe('whisper')
+  })
+
+  it('keeps cloud engines on auto when a key exists', () => {
+    expect(chooseNativeSttStrategy({
+      language: 'multi',
+      hasAssemblyKey: false,
+      hasDeepgramKey: true,
+      hasLocalWhisper: true,
+    })).toBe('deepgram')
+  })
+
   it('uses Assembly retry when language routes to Assembly and that key exists', () => {
     expect(chooseNativeSttStrategy({
       language: 'en',

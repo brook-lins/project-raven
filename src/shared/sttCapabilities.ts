@@ -13,12 +13,13 @@ export type TranscriptProviderConfig =
   | { kind: 'assemblyai'; speechModel: 'u3-rt-pro' }
   | { kind: 'deepgram'; model: 'nova-3'; language: string }
 
-export type NativeSttStrategy = 'assembly-retry' | 'deepgram' | 'none'
+export type NativeSttStrategy = 'assembly-retry' | 'deepgram' | 'whisper' | 'none'
 
-export type SttProviderPreference = 'auto' | 'assemblyai' | 'deepgram'
+/** `whisper` is on-device WhisperKit (macOS only); the others are cloud APIs. */
+export type SttProviderPreference = 'auto' | 'assemblyai' | 'deepgram' | 'whisper'
 
 export function parseSttProviderPreference(value: unknown): SttProviderPreference {
-  if (value === 'assemblyai' || value === 'deepgram' || value === 'auto') return value
+  if (value === 'assemblyai' || value === 'deepgram' || value === 'whisper' || value === 'auto') return value
   return 'auto'
 }
 
@@ -41,43 +42,49 @@ export function pickTranscriptProvider(language: string | undefined): Transcript
 
 /**
  * Native-capture STT pick. Explicit preference wins when that engine is
- * keyed and (for Assembly) language-supported. Otherwise language routing,
- * then whichever key exists.
+ * keyed and (for Assembly) language-supported, or for local Whisper when a
+ * model and the helper are present. Otherwise language routing, then
+ * whichever key exists, then local Whisper as the keyless last resort.
  */
 export function chooseNativeSttStrategy(opts: {
   language: string | undefined
   hasAssemblyKey: boolean
   hasDeepgramKey: boolean
+  hasLocalWhisper?: boolean
   preferredProvider?: unknown
 }): NativeSttStrategy {
   const preferred = parseSttProviderPreference(opts.preferredProvider)
   const assemblyUsable = assemblyaiSupportsLanguage(opts.language) && opts.hasAssemblyKey
+  const whisperFallback: NativeSttStrategy = opts.hasLocalWhisper ? 'whisper' : 'none'
+
+  if (preferred === 'whisper' && opts.hasLocalWhisper) return 'whisper'
 
   if (preferred === 'deepgram') {
     if (opts.hasDeepgramKey) return 'deepgram'
     if (opts.hasAssemblyKey) return 'assembly-retry'
-    return 'none'
+    return whisperFallback
   }
 
   if (preferred === 'assemblyai') {
     if (assemblyUsable) return 'assembly-retry'
     if (opts.hasDeepgramKey) return 'deepgram'
     if (opts.hasAssemblyKey) return 'assembly-retry'
-    return 'none'
+    return whisperFallback
   }
 
   const routed = pickTranscriptProvider(opts.language)
   if (routed.kind === 'assemblyai' && opts.hasAssemblyKey) return 'assembly-retry'
   if (opts.hasDeepgramKey) return 'deepgram'
   if (opts.hasAssemblyKey) return 'assembly-retry'
-  return 'none'
+  return whisperFallback
 }
 
 export function effectiveSttEngine(
   opts: Parameters<typeof chooseNativeSttStrategy>[0],
-): 'assemblyai' | 'deepgram' | 'none' {
+): 'assemblyai' | 'deepgram' | 'whisper' | 'none' {
   const strategy = chooseNativeSttStrategy(opts)
   if (strategy === 'assembly-retry') return 'assemblyai'
   if (strategy === 'deepgram') return 'deepgram'
+  if (strategy === 'whisper') return 'whisper'
   return 'none'
 }

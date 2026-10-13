@@ -56,6 +56,13 @@
         "from": "src/native/swift/AudioCapture/.build/release/audiocapture",
         "to": "swift/audiocapture"
       },
+      // On-device Whisper helper (npm run build:whisper). SwiftPM resource
+      // bundles must sit next to the binary or Bundle.module traps.
+      {
+        "from": "src/native/swift/WhisperSTT/.build/release/",
+        "to": "swift/",
+        "filter": ["whisperstt", "*.bundle/**"]
+      },
       {
         "from": "src/native/aec/build/Release/raven-aec.node",
         "to": "raven-aec.node"

@@ -18,7 +18,7 @@ export function TranscriptTab() {
   const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(null)
   const [connection, setConnection] = useState<{
     phase: 'idle' | 'connecting' | 'retrying' | 'connected' | 'failed'
-    provider?: 'recall' | 'assemblyai' | 'deepgram' | null
+    provider?: 'recall' | 'assemblyai' | 'deepgram' | 'whisper' | null
     retryCount?: number
     maxRetries?: number
     nextRetryAt?: number | null
@@ -141,7 +141,9 @@ export function TranscriptTab() {
         ? 'Deepgram'
         : connection.provider === 'recall'
           ? 'Recall'
-          : null
+          : connection.provider === 'whisper'
+            ? 'Local Whisper'
+            : null
 
   if (entries.length === 0 && !interims.mic && !interims.system) {
     return (

@@ -93,6 +93,12 @@ declare global {
         extras?: { openaiKey?: string },
       ) => Promise<{ valid: boolean; error?: string; deepgramError?: string; aiError?: string; openaiError?: string; throttled?: boolean }>;
       validateAssemblyAIKey: (apiKey: string) => Promise<{ valid: boolean; error?: string }>;
+      whisperGetStatus: () => Promise<{
+        supported: boolean;
+        helperBuilt: boolean;
+        models: Array<{ name: string; path: string }>;
+        activeModelPath: string | null;
+      }>;
       validateRecallKey: (apiKey: string, apiUrl?: string) => Promise<{ valid: boolean; error?: string }>;
       openExternal: (url: string) => Promise<boolean>;
       quitApp: () => Promise<void>;
@@ -258,7 +264,7 @@ declare global {
       onTranscriptionStatus: (callback: (data: { status: string }) => void) => () => void;
       onTranscriptionConnectionState: (callback: (data: {
         phase: 'idle' | 'connecting' | 'retrying' | 'connected' | 'failed';
-        provider?: 'recall' | 'assemblyai' | 'deepgram' | null;
+        provider?: 'recall' | 'assemblyai' | 'deepgram' | 'whisper' | null;
         retryCount?: number;
         maxRetries?: number;
         nextRetryAt?: number | null;

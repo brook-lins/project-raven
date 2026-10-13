@@ -18,6 +18,8 @@ export function ApiKeysTab() {
   const [originalDeepgramKey, setOriginalDeepgramKey] = useState('')
   const [originalAnthropicKey, setOriginalAnthropicKey] = useState('')
   const [deepgramStatus, setDeepgramStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle')
+  // On-device Whisper needs no transcription key.
+  const [localWhisperReady, setLocalWhisperReady] = useState(false)
   const [anthropicStatus, setAnthropicStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle')
   const [openaiStatus, setOpenaiStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle')
   const [isSaving, setIsSaving] = useState(false)
@@ -47,6 +49,8 @@ export function ApiKeysTab() {
         }
         const aaiKey = (await window.raven.storeGet('assemblyaiApiKey')) as string
         if (aaiKey) { setAssemblyKey(aaiKey); setOriginalAssemblyKey(aaiKey); setAssemblyStatus('valid') }
+        const whisper = await window.raven.whisperGetStatus()
+        setLocalWhisperReady(whisper.helperBuilt && whisper.models.length > 0)
       } catch (error) {
         log.error('Failed to load API keys:', error)
       }
@@ -62,7 +66,7 @@ export function ApiKeysTab() {
   const canSave = hasChanges
 
   const validateKeys = async (showSuccessMessage = true) => {
-    if (!deepgramKey.trim() && !assemblyKey.trim()) {
+    if (!deepgramKey.trim() && !assemblyKey.trim() && !localWhisperReady) {
       setSaveMessage({ type: 'error', text: 'Add a Deepgram or AssemblyAI key for transcription' })
       return false
     }
@@ -239,7 +243,10 @@ export function ApiKeysTab() {
             </button>
           </div>
         </div>
-        <p className="text-xs text-gray-400">Real-time speech-to-text. Fallback when AssemblyAI is unset or fails. Pick the engine under Language.</p>
+        <p className="text-xs text-gray-400">
+          Real-time speech-to-text. Fallback when AssemblyAI is unset or fails. Pick the engine under Language.
+          {localWhisperReady && ' Not needed for Local Whisper, which runs on this Mac.'}
+        </p>
       </div>
 
       <div className="space-y-2">

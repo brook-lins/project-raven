@@ -46,7 +46,9 @@ export interface LocalSettings {
   openOnLogin: boolean;
   transcriptionLanguage: string;
   /** Which STT engine to try. `auto` follows language routing. */
-  sttProvider: 'auto' | 'assemblyai' | 'deepgram';
+  sttProvider: 'auto' | 'assemblyai' | 'deepgram' | 'whisper';
+  /** WhisperKit model folder for the local engine. Empty = best one found on disk. */
+  whisperModelPath: string;
   outputLanguage: string;
   // User's custom vocabulary for transcription (comma-separated string
   // stored locally, parsed into string[] when passed to the backend as
@@ -108,7 +110,9 @@ const STORE_DEFAULTS: LocalSettings = {
   theme: 'system',
   openOnLogin: false,
   transcriptionLanguage: 'en',
-  sttProvider: 'auto',
+  // This fork transcribes on-device by default where it can (macOS).
+  sttProvider: process.platform === 'darwin' ? 'whisper' : 'auto',
+  whisperModelPath: '',
   outputLanguage: 'en',
   vocabulary: '',
   aiProvider: 'anthropic',
@@ -194,6 +198,7 @@ export function getAllSettings(): LocalSettings {
     openOnLogin: store.get('openOnLogin'),
     transcriptionLanguage: store.get('transcriptionLanguage'),
     sttProvider: store.get('sttProvider'),
+    whisperModelPath: store.get('whisperModelPath'),
     outputLanguage: store.get('outputLanguage'),
     vocabulary: store.get('vocabulary'),
     aiProvider: store.get('aiProvider'),
@@ -299,7 +304,9 @@ export function saveApiKeys(
 }
 
 export function hasApiKeys(): boolean {
-  const hasStt = !!getApiKey('deepgramApiKey') || !!getApiKey('assemblyaiApiKey');
+  // Local Whisper needs no key, so choosing it satisfies the STT half.
+  const hasStt = !!getApiKey('deepgramApiKey') || !!getApiKey('assemblyaiApiKey')
+    || store.get('sttProvider') === 'whisper';
   const provider = store.get('aiProvider') || 'anthropic';
   const hasAiKey = provider === 'openai'
     ? !!getApiKey('openaiApiKey')

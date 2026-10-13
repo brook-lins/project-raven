@@ -61,6 +61,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [screenPermission, setScreenPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [accessibilityPermission, setAccessibilityPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [deepgramKey, setDeepgramKey] = useState('')
+  // On-device Whisper needs no transcription key.
+  const [localWhisperReady, setLocalWhisperReady] = useState(false)
+  useEffect(() => {
+    window.raven.whisperGetStatus()
+      .then((s) => setLocalWhisperReady(s.helperBuilt && s.models.length > 0))
+      .catch(() => {})
+  }, [])
   const [assemblyKey, setAssemblyKey] = useState('')
   const [aiProvider, setAiProvider] = useState<AiProvider>('anthropic')
   const [anthropicKey, setAnthropicKey] = useState('')
@@ -82,11 +89,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   const handleNext = async () => {
     if (step === ONBOARDING_STEP.keys) {
-      const hasStt = !!deepgramKey.trim() || !!assemblyKey.trim()
+      const hasStt = !!deepgramKey.trim() || !!assemblyKey.trim() || localWhisperReady
       if (!hasStt || !aiKey.trim()) {
         setError('Add a transcription key (Deepgram or AssemblyAI) and an AI key.')
-        setDeepgramInvalid(!deepgramKey.trim() && !assemblyKey.trim())
-        setAssemblyInvalid(!deepgramKey.trim() && !assemblyKey.trim())
+        setDeepgramInvalid(!hasStt)
+        setAssemblyInvalid(!hasStt)
         setAiKeyInvalid(!aiKey.trim())
         return
       }
@@ -374,7 +381,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">Speech-to-text. Free tier: $200 credit. Optional if you use AssemblyAI below.</p>
+                    <p className="text-xs text-gray-400">
+                      {localWhisperReady
+                        ? 'Optional. A local Whisper model was found on this Mac, so transcription can run on-device with no key.'
+                        : 'Speech-to-text. Free tier: $200 credit. Optional if you use AssemblyAI below.'}
+                    </p>
                   </div>
 
                   {/* AssemblyAI */}
@@ -568,7 +579,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   </button>
                   <button
                     onClick={handleNext}
-                    disabled={(!deepgramKey.trim() && !assemblyKey.trim()) || !aiKey.trim() || validating}
+                    disabled={(!deepgramKey.trim() && !assemblyKey.trim() && !localWhisperReady) || !aiKey.trim() || validating}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium shadow-sm transition-all"
                   >
                     {validating ? (

@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('raven', {
     ipcRenderer.invoke('validate-keys', deepgramKey, aiProvider, aiKey, extras),
   validateAssemblyAIKey: (apiKey: string) =>
     ipcRenderer.invoke('validate-assemblyai-key', apiKey),
+  whisperGetStatus: () => ipcRenderer.invoke('whisper:get-status'),
   validateRecallKey: (apiKey: string, apiUrl?: string) =>
     ipcRenderer.invoke('validate-recall-key', apiKey, apiUrl),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),

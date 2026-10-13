@@ -42,7 +42,8 @@
     "test:all": "vitest run && npx playwright test --config e2e/playwright.config.ts",
     "preview": "vite preview",
     "build:aec": "cd src/native/aec && npm install --cache /tmp/npm-cache-aec && npx cmake-js compile",
-    "build:swift": "cd src/native/swift/AudioCapture && swift build -c release"
+    "build:swift": "cd src/native/swift/AudioCapture && swift build -c release",
+    "build:whisper": "cd src/native/swift/WhisperSTT && swift build -c release"
   },
   "overrides": {
     "protobufjs": "^7.6.0",

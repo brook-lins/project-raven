@@ -243,7 +243,7 @@ export class TranscriptionService {
     }
   }
 
-  private handleTranscriptResult(
+  protected handleTranscriptResult(
     data: {
       channel?: {
         alternatives?: Array<{
@@ -345,6 +345,32 @@ export class TranscriptionService {
         },
       });
     }
+  }
+
+  /**
+   * Drop a source's interim without producing a final, and tell the
+   * windows so the "still speaking" line disappears.
+   */
+  protected clearInterim(source: AudioSource): void {
+    const state = source === 'mic' ? this.micConnection : this.systemConnection;
+    if (!state.currentInterim) return;
+    state.currentInterim = '';
+    this.broadcastTranscript({
+      entry: {
+        id: `interim-${source}`,
+        source,
+        text: '',
+        speaker: source === 'mic' ? 'you' : 'them',
+        timestamp: Date.now(),
+        isFinal: false,
+      },
+      isFinal: false,
+      fullTranscript: this.getFullTranscriptText(),
+      interims: {
+        mic: this.micConnection.currentInterim,
+        system: this.systemConnection.currentInterim,
+      },
+    });
   }
 
   /**

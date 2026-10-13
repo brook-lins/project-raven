@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { createLogger } from '../../../lib/logger'
 import {
   ASSEMBLYAI_LIVE_LANGUAGE_LABELS,
@@ -27,6 +27,8 @@ export function LanguageTab() {
   const [sttProvider, setSttProvider] = useState<SttProviderPreference>('auto')
   const [hasAssemblyKey, setHasAssemblyKey] = useState(false)
   const [hasDeepgramKey, setHasDeepgramKey] = useState(false)
+  const [whisper, setWhisper] = useState<Awaited<ReturnType<typeof window.raven.whisperGetStatus>> | null>(null)
+  const [whisperModelPath, setWhisperModelPath] = useState('')
   const [vocabulary, setVocabulary] = useState('')
   const [vocabularySaveState, setVocabularySaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [transcriptionDropdownOpen, setTranscriptionDropdownOpen] = useState(false)
@@ -50,6 +52,8 @@ export function LanguageTab() {
         setSttProvider(stt)
         setHasDeepgramKey(!!dgKey?.trim())
         setHasAssemblyKey(!!aaiKey?.trim())
+        setWhisperModelPath(((await window.raven.storeGet('whisperModelPath')) as string) || '')
+        setWhisper(await window.raven.whisperGetStatus())
       } catch (error) {
         log.error('Failed to load language settings:', error)
       }
@@ -91,6 +95,12 @@ export function LanguageTab() {
   const handleSttProviderChange = async (value: SttProviderPreference) => {
     setSttProvider(value)
     await window.raven.storeSet('sttProvider', value)
+  }
+
+  const handleWhisperModelChange = async (value: string) => {
+    setWhisperModelPath(value)
+    await window.raven.storeSet('whisperModelPath', value)
+    setWhisper(await window.raven.whisperGetStatus())
   }
 
   // Debounced save - don't round-trip to the server on every keystroke.
@@ -163,14 +173,24 @@ export function LanguageTab() {
   const assemblyLangOk = assemblyaiSupportsLanguage(transcriptionLang)
   const assemblySelectable = assemblyLangOk && hasAssemblyKey
   const deepgramSelectable = hasDeepgramKey
+  const whisperModels = whisper?.models ?? []
+  const whisperSelectable = !!whisper?.helperBuilt && whisperModels.length > 0
+  const activeWhisperModel = whisperModels.find((m) => m.path === whisper?.activeModelPath)
   const willUse = effectiveSttEngine({
     language: transcriptionLang,
     hasAssemblyKey,
     hasDeepgramKey,
+    hasLocalWhisper: whisperSelectable,
     preferredProvider: sttProvider,
   })
   const willUseLabel =
-    willUse === 'assemblyai' ? 'AssemblyAI' : willUse === 'deepgram' ? 'Deepgram' : 'no engine (add an API key)'
+    willUse === 'assemblyai'
+      ? 'AssemblyAI'
+      : willUse === 'deepgram'
+        ? 'Deepgram'
+        : willUse === 'whisper'
+          ? `Local Whisper${activeWhisperModel ? ` (${activeWhisperModel.name})` : ''}`
+          : 'no engine (add an API key)'
 
   return (
     <div className="space-y-6 max-w-xl">
@@ -249,12 +269,43 @@ export function LanguageTab() {
         </div>
 
         <div role="radiogroup" aria-label="Speech-to-text engine" className="space-y-2">
+          {whisper?.supported && (
+            <SttRadio
+              value="whisper"
+              selected={sttProvider}
+              onSelect={handleSttProviderChange}
+              disabled={!whisperSelectable}
+              title="Local Whisper (on-device)"
+              description="Runs a WhisperKit model on this Mac. No API key, and audio never leaves the machine."
+              hint={
+                !whisper.helperBuilt
+                  ? 'The whisperstt helper is not built. Run `npm run build:whisper`.'
+                  : whisperModels.length === 0
+                    ? 'No WhisperKit model found. Download one in MacWhisper, then reopen Settings.'
+                    : undefined
+              }
+            >
+              {whisperModels.length > 0 && (
+                <select
+                  value={whisperModelPath}
+                  onChange={(e) => handleWhisperModelChange(e.target.value)}
+                  aria-label="Whisper model"
+                  className="mt-2 w-full px-2 py-1.5 text-xs bg-white border border-gray-300 rounded-md"
+                >
+                  <option value="">Best available ({whisperModels[0].name})</option>
+                  {whisperModels.map((m) => (
+                    <option key={m.path} value={m.path}>{m.name}</option>
+                  ))}
+                </select>
+              )}
+            </SttRadio>
+          )}
           <SttRadio
             value="auto"
             selected={sttProvider}
             onSelect={handleSttProviderChange}
             title="Automatic"
-            description={`AssemblyAI for ${ASSEMBLYAI_LIVE_LANGUAGE_LABELS}. Deepgram for auto-detect and every other language.`}
+            description={`AssemblyAI for ${ASSEMBLYAI_LIVE_LANGUAGE_LABELS}. Deepgram for auto-detect and every other language. Local Whisper when no key is set.`}
           />
           <SttRadio
             value="assemblyai"
@@ -285,6 +336,7 @@ export function LanguageTab() {
         <p className="text-xs text-gray-500">
           Next recording will use <span className="font-medium text-gray-700">{willUseLabel}</span>
           {sttProvider === 'assemblyai' && willUse === 'deepgram' && ' (AssemblyAI is not available for this language).'}
+          {sttProvider === 'whisper' && willUse !== 'whisper' && ' (Local Whisper is not available on this machine).'}
           {sttProvider !== 'auto' && willUse === 'assemblyai' && ' — falls back to Deepgram if AssemblyAI cannot connect.'}
         </p>
       </div>
@@ -400,6 +452,7 @@ function SttRadio({
   title,
   description,
   hint,
+  children,
 }: {
   value: SttProviderPreference
   selected: SttProviderPreference
@@ -408,6 +461,7 @@ function SttRadio({
   title: string
   description: string
   hint?: string
+  children?: ReactNode
 }) {
   const checked = selected === value
   return (
@@ -429,10 +483,11 @@ function SttRadio({
         onChange={() => onSelect(value)}
         className="mt-1 accent-blue-600"
       />
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium text-gray-900">{title}</span>
         <span className="block text-xs text-gray-500 mt-0.5">{description}</span>
         {hint && <span className="block text-xs text-amber-700 mt-1">{hint}</span>}
+        {children}
       </span>
     </label>
   )

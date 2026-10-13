@@ -112,11 +112,21 @@ Installed copies check GitHub Releases for updates (`latest.yml` on Windows, `la
 
 ---
 
+## Local Whisper (macOS)
+
+This fork can transcribe on-device instead of sending audio to Deepgram or AssemblyAI. A small Swift helper (`src/native/swift/WhisperSTT`, built on [WhisperKit](https://github.com/argmaxinc/WhisperKit)) receives the same echo-cancelled mic and system streams, cuts them into utterances, and returns interim and final text.
+
+- **Build the helper:** `npm run build:whisper` (Xcode required; macOS 14+).
+- **Models:** nothing is downloaded. Raven lists WhisperKit model folders it finds in MacWhisper's library (`~/Library/Application Support/MacWhisper/models/whisperkit/models/argmaxinc/whisperkit-coreml/`) and in `whisper-models/` under Raven's own app-data folder. Download a model in MacWhisper, or copy a WhisperKit model folder into `whisper-models/`. MacWhisper's Parakeet and "Pro" models use a proprietary format and are not usable here.
+- **Select it:** Settings → Language → Speech-to-text engine → **Local Whisper (on-device)**, then pick a model. It is the default engine on macOS, and with it selected no transcription key is required.
+- **First use of a model** fetches its tokenizer file (a few MB) from Hugging Face once and caches it under Raven's app-data folder; after that transcription is fully offline.
+- **Trade-offs:** Whisper is not a streaming model, so text arrives about a second behind speech and finals land after a ~0.7 s pause. Accuracy depends on the model: `base` is fast but rough, `large-v3` turbo variants are much closer to the cloud engines.
+
 ## Features
 
 - **Dual-stream capture** — System audio + microphone. macOS uses ScreenCaptureKit + CoreAudio; Windows uses WASAPI loopback + capture (Rust/NAPI).
 - **Echo cancellation** — GStreamer `webrtcechoprobe` / `webrtcdsp` (WebRTC AEC3), then a **residual echo gate** that drops mic chunks that still look like speaker bleed before they reach STT.
-- **Real-time transcription** — Two streams: **You** (cleaned mic) and **Them** (system audio). Deepgram `nova-3` and/or AssemblyAI `u3-rt-pro`. Auto-routing prefers AssemblyAI for English, Spanish, French, German, Portuguese, and Italian when that key is present; otherwise Deepgram. Settings can force either engine.
+- **Real-time transcription** — Two streams: **You** (cleaned mic) and **Them** (system audio). Deepgram `nova-3` and/or AssemblyAI `u3-rt-pro`. Auto-routing prefers AssemblyAI for English, Spanish, French, German, Portuguese, and Italian when that key is present; otherwise Deepgram. Settings can force either engine. On macOS, **Local Whisper** transcribes on-device with a WhisperKit model instead (no transcription key, audio stays on the Mac) — see [Local Whisper](#local-whisper-macos).
 - **AI assistance** — Anthropic or OpenAI from the overlay (Assist, recap, follow-up, and custom prompts). Optional screenshot via `desktopCapturer`.
 - **Stealth overlay** — Electron `setContentProtection` so the overlay and dashboard are omitted from typical screen-share APIs (Zoom, Meet, Teams, Discord). Not a guarantee against every capture tool.
 - **Modes** — Local behavior profiles (system prompt, notes templates). Attach documents for RAG on that mode.
@@ -656,7 +666,7 @@ Test-Path src\native\windows\raven-windows-audio.win32-x64-msvc.node
 npm run dev
 ```
 
-The Electron app opens. On first launch you'll see a 6-step onboarding flow — enter a transcription key (Deepgram and/or AssemblyAI) and an AI key (Anthropic or OpenAI).
+The Electron app opens. On first launch you'll see a 6-step onboarding flow — enter a transcription key (Deepgram and/or AssemblyAI; optional on macOS when a local Whisper model is found) and an AI key (Anthropic or OpenAI).
 
 > **If the app starts but audio capture doesn't work:** Check **Settings → Sound** and make sure the correct playback and recording devices are set as default. WASAPI captures from the **default** devices. The Settings mic picker only drives the in-app mic test.
 

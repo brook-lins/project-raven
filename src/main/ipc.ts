@@ -133,6 +133,16 @@ export function registerIpcHandlers(): void {
     }
   )
 
+  safeHandle('whisper:get-status', async () => {
+    const { listLocalWhisperModels, resolveLocalWhisperModel, getWhisperBinaryPath } = await import('./services/localWhisperModels')
+    return {
+      supported: process.platform === 'darwin',
+      helperBuilt: !!getWhisperBinaryPath(),
+      models: listLocalWhisperModels(),
+      activeModelPath: resolveLocalWhisperModel()?.path ?? null,
+    }
+  })
+
   safeHandle('store:has-api-keys', () => {
     return hasApiKeys()
   })

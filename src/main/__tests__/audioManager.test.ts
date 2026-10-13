@@ -48,6 +48,26 @@ vi.mock('../transcriptionService', () => ({
   TranscriptionService: vi.fn(function () { return mockTranscriptionService }),
 }))
 
+const mockWhisperAvailable = vi.hoisted(() => vi.fn(() => false))
+const mockWhisperService = vi.hoisted(() => ({
+  setWindows: vi.fn(),
+  setExitHandler: vi.fn(),
+  start: vi.fn().mockResolvedValue({ success: true }),
+  stop: vi.fn().mockResolvedValue(undefined),
+  sendAudio: vi.fn(),
+  clearTranscript: vi.fn(),
+  seedTranscript: vi.fn(),
+  getTranscriptEntries: vi.fn(() => []),
+}))
+
+vi.mock('../services/localWhisperModels', () => ({
+  isLocalWhisperAvailable: mockWhisperAvailable,
+}))
+
+vi.mock('../services/localWhisperTranscriptionService', () => ({
+  LocalWhisperTranscriptionService: vi.fn(function () { return mockWhisperService }),
+}))
+
 const mockSessionManager = vi.hoisted(() => ({
   startSession: vi.fn(() => ({ id: 'session-1', transcript: [] })),
   endSession: vi.fn(() => ({ id: 'session-1', transcript: [{ id: '1', text: 'test' }] })),
@@ -316,11 +336,47 @@ describe('AudioManager', () => {
 
       expect(result).toEqual({
         success: false,
-        error: 'Add a Deepgram or AssemblyAI key in Settings before recording.',
+        error: 'Pick Local Whisper under Settings → Language, or add a Deepgram or AssemblyAI key, before recording.',
       })
       expect(manager.getIsRecording()).toBe(false)
       expect(mockStopCapture).toHaveBeenCalled()
       expect(mockTranscriptionService.setApiKey).not.toHaveBeenCalled()
+    })
+
+    it('records with local Whisper when it is the chosen engine, without touching Deepgram', async () => {
+      mockWhisperAvailable.mockReturnValueOnce(true)
+      mockWhisperService.start.mockResolvedValueOnce({ success: true })
+      mockGetSetting.mockImplementation((key: string) => {
+        if (key === 'sttProvider') return 'whisper'
+        if (key === 'deepgramApiKey') return 'dg-test-key'
+        return ''
+      })
+
+      const handler = mockIpcHandlers['audio:start-recording']
+      const result = await handler({})
+
+      expect(result).toEqual({ success: true })
+      expect(manager.getIsRecording()).toBe(true)
+      expect(mockWhisperService.start).toHaveBeenCalled()
+      expect(mockTranscriptionService.start).not.toHaveBeenCalled()
+
+      const onAudio = mockSetProcessedAudioCallback.mock.calls.at(-1)![0] as (b: Buffer, s: 'mic' | 'system') => void
+      const chunk = Buffer.alloc(320)
+      onAudio(chunk, 'system')
+      expect(mockWhisperService.sendAudio).toHaveBeenCalledWith(chunk, 'system')
+    })
+
+    it('fails the start cleanly when the local Whisper model cannot load', async () => {
+      mockWhisperAvailable.mockReturnValueOnce(true)
+      mockWhisperService.start.mockResolvedValueOnce({ success: false, error: 'Could not load Whisper model' })
+      mockGetSetting.mockImplementation((key: string) => (key === 'sttProvider' ? 'whisper' : ''))
+
+      const handler = mockIpcHandlers['audio:start-recording']
+      const result = await handler({})
+
+      expect(result).toEqual({ success: false, error: 'Could not load Whisper model' })
+      expect(manager.getIsRecording()).toBe(false)
+      expect(mockStopCapture).toHaveBeenCalled()
     })
 
     it('refuses to start when Deepgram connect fails', async () => {
