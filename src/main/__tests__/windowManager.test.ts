@@ -49,6 +49,8 @@ vi.mock('electron', () => ({
       bounds: { x: 0, y: 0, width: 1920, height: 1080 },
       workAreaSize: { width: 1920, height: 1080 },
     })),
+    on: vi.fn(),
+    removeListener: vi.fn(),
   },
   app: {
     getPath: vi.fn(() => '/tmp'),

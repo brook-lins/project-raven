@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import ScreenCaptureKit
 import CoreMedia
 import AudioToolbox
@@ -564,6 +565,34 @@ private func runAudioCapture() {
         await AudioCaptureApp.main()
     }
     RunLoop.main.run()
+}
+
+/// `audiocapture --notch-info`: print each screen's camera-housing cutout
+/// as JSON and exit, so the overlay can sit in it. Sizes are in points;
+/// a screen without a cutout reports zeros.
+private func printNotchInfo() {
+    let screens: [[String: Double]] = NSScreen.screens.map { screen in
+        let frame = screen.frame
+        var notchX = 0.0, notchWidth = 0.0, notchHeight = 0.0
+        if let left = screen.auxiliaryTopLeftArea, let right = screen.auxiliaryTopRightArea,
+           screen.safeAreaInsets.top > 0 {
+            notchX = left.maxX - frame.minX
+            notchWidth = right.minX - left.maxX
+            notchHeight = screen.safeAreaInsets.top
+        }
+        return [
+            "frameX": frame.minX, "frameWidth": frame.width, "frameHeight": frame.height,
+            "notchX": notchX, "notchWidth": notchWidth, "notchHeight": notchHeight,
+        ]
+    }
+    if let data = try? JSONSerialization.data(withJSONObject: screens) {
+        FileHandle.standardOutput.write(data)
+    }
+}
+
+if CommandLine.arguments.contains("--notch-info") {
+    printNotchInfo()
+    exit(0)
 }
 
 if #available(macOS 14.0, *) {

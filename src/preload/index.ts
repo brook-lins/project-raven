@@ -48,6 +48,7 @@ contextBridge.exposeInMainWorld('raven', {
   windowResize: (width: number, height: number) => ipcRenderer.invoke('window:resize', width, height),
   windowGetOverlayBounds: () => ipcRenderer.invoke('window:get-overlay-bounds'),
   windowGetOverlaySafeInsets: () => ipcRenderer.invoke('window:get-overlay-safe-insets'),
+  windowGetOverlayNotch: () => ipcRenderer.invoke('window:get-overlay-notch'),
   windowGetCursorPoint: () => ipcRenderer.invoke('window:get-cursor-point'),
   windowSetOverlayBounds: (bounds: { x: number; y: number; width: number; height: number }) =>
     ipcRenderer.invoke('window:set-overlay-bounds', bounds),
@@ -419,6 +420,8 @@ contextBridge.exposeInMainWorld('raven', {
       // Ctrl+\ hide). useMousePassthrough re-arms mouse-event forwarding
       // so the overlay stays grabbable instead of bleeding clicks through.
       'overlay:shown',
+      // The notch/floating layout setting changed in the dashboard.
+      'overlay:placement-changed',
     ]
     if (!ALLOWED_CHANNELS.includes(channel)) {
       return () => {}

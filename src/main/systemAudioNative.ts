@@ -434,6 +434,11 @@ interface WindowsAudioModule {
   stopMicCapture: () => boolean
 }
 
+/** Path to the audiocapture helper; also used for its `--notch-info` mode. */
+export function getAudioCaptureBinaryPath(): string | null {
+  return getBinaryPath()
+}
+
 function getBinaryPath(): string | null {
   if (!isMac) return null
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { macSettingsPrimaryAction, macSettingsPrimaryLabel } from '../../../../../shared/macManualUpdate'
 import { requestMacUpdatePrompt } from '../../../lib/macUpdatePrompt'
+import { detectMacPlatform } from '../../../lib/shortcutLabels'
 
 interface UpdateState {
   status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error'
@@ -12,9 +13,12 @@ interface UpdateState {
 
 type MeetingAutoStart = 'off' | 'prompt' | 'auto'
 
+const isMac = detectMacPlatform()
+
 export function GeneralTab() {
   const [stealth, setStealth] = useState(false)
   const [openOnLogin, setOpenOnLogin] = useState(false)
+  const [notchOverlay, setNotchOverlay] = useState(true)
   const [meetingAutoStart, setMeetingAutoStart] = useState<MeetingAutoStart>('prompt')
   const [appVersion, setAppVersion] = useState('...')
   const [updateState, setUpdateState] = useState<UpdateState>({ status: 'idle' })
@@ -25,6 +29,7 @@ export function GeneralTab() {
       const settings = await window.raven.storeGetAll()
       setStealth(settings.stealthEnabled as boolean)
       setOpenOnLogin(settings.openOnLogin as boolean)
+      setNotchOverlay(settings.overlayPlacement !== 'floating')
       if (settings.meetingAutoStart) {
         setMeetingAutoStart(settings.meetingAutoStart as MeetingAutoStart)
       }
@@ -51,6 +56,11 @@ export function GeneralTab() {
   const handleOpenOnLogin = async (enabled: boolean) => {
     setOpenOnLogin(enabled)
     await window.raven.storeSet('openOnLogin', enabled)
+  }
+
+  const handleNotchOverlay = async (enabled: boolean) => {
+    setNotchOverlay(enabled)
+    await window.raven.storeSet('overlayPlacement', enabled ? 'notch' : 'floating')
   }
 
   const handleMeetingAutoStart = async (value: MeetingAutoStart) => {
@@ -175,6 +185,38 @@ export function GeneralTab() {
             />
           </button>
         </div>
+
+        {/* Notch overlay */}
+        {isMac && (
+          <div className="flex items-center justify-between py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 6.75A1.75 1.75 0 014.75 5H8.5v1.25A1.75 1.75 0 0010.25 8h3.5a1.75 1.75 0 001.75-1.75V5h3.75A1.75 1.75 0 0121 6.75v8.5A1.75 1.75 0 0119.25 17H4.75A1.75 1.75 0 013 15.25v-8.5zM8 20h8" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Keep Raven in the notch</p>
+                <p className="text-xs text-gray-400 mt-0.5">Dock the overlay in the MacBook camera cutout. On a display without one it floats as a movable card.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => handleNotchOverlay(!notchOverlay)}
+              role="switch"
+              aria-checked={notchOverlay}
+              aria-label="Keep Raven in the notch"
+              className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${
+                notchOverlay ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  notchOverlay ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        )}
 
         {/* Meeting auto-start */}
         <div className="py-4 border-b border-gray-100">

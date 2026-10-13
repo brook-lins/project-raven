@@ -146,6 +146,7 @@ declare global {
       windowResize: (width: number, height: number) => Promise<boolean>;
       windowGetOverlayBounds: () => Promise<{ x: number; y: number; width: number; height: number } | null>;
       windowGetOverlaySafeInsets: () => Promise<{ top: number; right: number; bottom: number; left: number }>;
+      windowGetOverlayNotch: () => Promise<{ x: number; y: number; width: number; height: number } | null>;
       windowGetCursorPoint: () => Promise<{ x: number; y: number }>;
       windowSetOverlayBounds: (bounds: { x: number; y: number; width: number; height: number }) => Promise<boolean>;
       windowHideOverlay: () => Promise<boolean>;

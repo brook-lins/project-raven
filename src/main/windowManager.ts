@@ -390,6 +390,25 @@ export function createOverlayWindow(preloadPath: string, rendererURL: string | n
     overlayWindow = null
   })
 
+  // The notch layout depends on which screen the overlay is on and how it
+  // is scaled; re-measure and let the renderer re-place itself.
+  const onDisplaysChanged = (): void => {
+    void import('./notch').then(({ invalidateNotchCache }) => {
+      invalidateNotchCache()
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('overlay:placement-changed')
+      }
+    })
+  }
+  screen.on('display-metrics-changed', onDisplaysChanged)
+  screen.on('display-added', onDisplaysChanged)
+  screen.on('display-removed', onDisplaysChanged)
+  overlayWindow.on('closed', () => {
+    screen.removeListener('display-metrics-changed', onDisplaysChanged)
+    screen.removeListener('display-added', onDisplaysChanged)
+    screen.removeListener('display-removed', onDisplaysChanged)
+  })
+
   overlayWindow.on('show', () => {
     if (!overlayEnabled && overlayWindow && !overlayWindow.isDestroyed()) {
       overlayWindow.hide()

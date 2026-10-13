@@ -94,6 +94,10 @@ export function registerIpcHandlers(): void {
       if (key === 'openOnLogin') {
         app.setLoginItemSettings({ openAtLogin: !!value })
       }
+      if (key === 'overlayPlacement') {
+        const overlay = getOverlayWindow()
+        if (overlay && !overlay.isDestroyed()) overlay.webContents.send('overlay:placement-changed')
+      }
       if (key === 'recallApiUrl') {
         void import('./services/vendorFeatures').then(({ reinitRecallFromStore }) =>
           reinitRecallFromStore(),
@@ -379,6 +383,26 @@ export function registerIpcHandlers(): void {
     const bounds = overlay.getBounds()
     const display = screen.getDisplayMatching(bounds)
     return overlaySafeInsetsForWindow(bounds, display.workArea)
+  })
+
+  // Where the camera cutout sits inside the overlay window, or null when
+  // the overlay should float (no cutout on its display, or the user chose
+  // the floating layout).
+  safeHandle('window:get-overlay-notch', async () => {
+    const overlay = getOverlayWindow()
+    if (!overlay || overlay.isDestroyed()) return null
+    if (getSetting('overlayPlacement') === 'floating') return null
+    const bounds = overlay.getBounds()
+    const display = screen.getDisplayMatching(bounds)
+    const { getNotchForDisplay } = await import('./notch')
+    const notch = await getNotchForDisplay(display)
+    if (!notch) return null
+    return {
+      x: display.bounds.x - bounds.x + notch.x,
+      y: display.bounds.y - bounds.y,
+      width: notch.width,
+      height: notch.height,
+    }
   })
 
   safeHandle('window:get-cursor-point', () => {

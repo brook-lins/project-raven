@@ -42,6 +42,8 @@ export interface LocalSettings {
 
   // Preferences
   stealthEnabled: boolean;
+  /** `notch` docks the overlay in the MacBook camera cutout when the display has one. */
+  overlayPlacement: 'notch' | 'floating';
   theme: 'light' | 'dark' | 'system';
   openOnLogin: boolean;
   transcriptionLanguage: string;
@@ -107,6 +109,7 @@ const STORE_DEFAULTS: LocalSettings = {
   dashboardBounds: null,
   overlayBounds: null,
   stealthEnabled: false,
+  overlayPlacement: 'notch',
   theme: 'system',
   openOnLogin: false,
   transcriptionLanguage: 'en',
@@ -194,6 +197,7 @@ export function getAllSettings(): LocalSettings {
     dashboardBounds: store.get('dashboardBounds'),
     overlayBounds: store.get('overlayBounds'),
     stealthEnabled: store.get('stealthEnabled'),
+    overlayPlacement: store.get('overlayPlacement'),
     theme: store.get('theme'),
     openOnLogin: store.get('openOnLogin'),
     transcriptionLanguage: store.get('transcriptionLanguage'),

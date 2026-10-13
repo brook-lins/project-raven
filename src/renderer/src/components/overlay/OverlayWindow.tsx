@@ -14,6 +14,7 @@ import 'highlight.js/styles/github-dark-dimmed.css'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Wand2, MessageSquareText, RotateCcw, ChevronRight } from 'lucide-react'
 import { ControllerPill } from './ControllerPill'
+import { NotchIsland, type NotchRect } from './NotchIsland'
 import { TranscriptTab } from './TranscriptTab'
 import { OverlayNotification, type NotificationData } from './OverlayNotification'
 import { useOverlayResize } from './useOverlayResize'
@@ -102,6 +103,10 @@ const getActionLabel = (action?: string): string => {
 
 export function OverlayWindow() {
   const [safeInsets, setSafeInsets] = useState<OverlayInsets>(EMPTY_OVERLAY_INSETS)
+  // Non-null when the overlay is docked in the MacBook camera cutout
+  // instead of floating as a draggable card.
+  const [notch, setNotch] = useState<NotchRect | null>(null)
+  const [notchAttention, setNotchAttention] = useState(0)
   const resize = useOverlayResize(safeInsets)
   const {
     panelWidth, panelRight, panelBottom, panelHeight,
@@ -204,8 +209,16 @@ export function OverlayWindow() {
         if (insets && typeof insets.top === 'number') setSafeInsets(insets)
       }).catch(() => {})
     }
+    const loadNotch = () => {
+      void window.raven.windowGetOverlayNotch?.().then((rect) => {
+        setNotch(rect && rect.width > 0 ? rect : null)
+      }).catch(() => {})
+    }
     loadInsets()
+    loadNotch()
     window.addEventListener('resize', loadInsets)
+    window.addEventListener('resize', loadNotch)
+    const unsubPlacement = window.raven.on('overlay:placement-changed', loadNotch)
 
     const unsubStealth = window.raven.onStealthChanged((enabled: boolean) => {
       setStealthEnabled(enabled)
@@ -385,6 +398,8 @@ export function OverlayWindow() {
       cleanupDrag()
       setOverlayMouseIgnore(false)
       window.removeEventListener('resize', loadInsets)
+      window.removeEventListener('resize', loadNotch)
+      unsubPlacement()
     }
     // cleanupDrag, cleanupResize and isRecording are intentionally omitted:
     // this effect runs once per overlay mount to wire up global listeners.
@@ -863,181 +878,16 @@ export function OverlayWindow() {
     setPanelRight(placed.right)
   }, [isPanelExpanded, setPanelHeight, setPanelBottom, setPanelRight, OVERLAY_DEFAULT_COMPACT_HEIGHT, OVERLAY_DEFAULT_EXPANDED_HEIGHT])
 
-  return (
-    <div
-      className="fixed inset-0 bg-transparent pointer-events-none"
-      style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-    >
-    {/* Notification area - top right */}
-    <div
-      ref={notificationRef}
-      className="absolute top-4 right-4 flex flex-col gap-2 z-[80] pointer-events-none"
-    >
-      <AnimatePresence>
-        {notifications.map(n => (
-          <OverlayNotification key={n.id} notification={n} onDismiss={dismissNotification} />
-        ))}
-      </AnimatePresence>
-    </div>
+  // A new response (or a limit notice) is the one thing the docked island
+  // opens itself for.
+  const responseCountRef = useRef(0)
+  useEffect(() => {
+    if (responses.length > responseCountRef.current || limitInfo) setNotchAttention((n) => n + 1)
+    responseCountRef.current = responses.length
+  }, [responses.length, limitInfo])
 
-    {/* Main panel - bottom right, draggable */}
-    <div
-      ref={panelColumnRef}
-      className="absolute flex flex-col p-4 pb-6 bg-transparent pointer-events-none"
-      style={{
-        WebkitAppRegion: 'no-drag',
-        rowGap: '10px',
-        paddingTop: stealthEnabled ? '3.4rem' : '2.75rem',
-        bottom: `${panelBottom}px`,
-        right: `${panelRight}px`,
-        width: `${panelWidth}px`,
-        ...(panelHeight ? { height: `${panelHeight}px` } : {}),
-        maxHeight: `calc(100vh - ${safeInsets.top + safeInsets.bottom + 40}px)`,
-      } as CSSProperties}
-    >
-      {/* Controller Pill - Centered */}
-      <div
-        ref={pillWrapperRef}
-        className="relative z-[70] w-fit self-center pointer-events-auto"
-        style={{
-          WebkitAppRegion: 'drag',
-          transform: stealthEnabled ? 'translateY(-10px)' : 'translateY(0)'
-        } as CSSProperties}
-      >
-        <ControllerPill
-          stealthEnabled={stealthEnabled}
-          isRecording={isRecording}
-          isStarting={isStarting}
-          incognitoMode={incognitoMode}
-          onToggleRecording={handleToggleRecording}
-          onToggleStealth={handleToggleStealth}
-          onToggleIncognito={handleToggleIncognito}
-          onHide={handleHide}
-          onLogoClick={handleLogoClick}
-          onLogoMouseDown={handleLogoMouseDown}
-        />
-      </div>
-
-      {/* Main Panel Wrapper */}
-      <div
-        ref={panelWrapperRef}
-        className={`relative pointer-events-auto ${isPanelExpanded ? 'flex-1 min-h-0' : ''}`}
-        style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-        onMouseEnter={handlePanelMouseEnter}
-        onMouseLeave={handlePanelMouseLeave}
-      >
-        {stealthEnabled && (
-          <div
-            className="absolute -inset-[10px] pointer-events-none z-[2] p-[0.6px]"
-            aria-hidden="true"
-          >
-            <svg className="w-full h-full overflow-visible">
-              <rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                rx="16"
-                ry="16"
-                fill="none"
-                stroke="rgba(118, 126, 142, 0.92)"
-                strokeWidth="1.4"
-                strokeDasharray="14 9"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-          </div>
-        )}
-
-        {/* Resize handles (side handles always available; bottom shown only with content) */}
-        <div
-          ref={leftRailRef}
-          className="absolute inset-y-0 -left-3 w-3 flex items-center justify-center cursor-ew-resize z-20"
-          style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-          onMouseEnter={() => setHoveredResizeEdge('left')}
-          onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'left' ? null : prev))}
-          onMouseDown={(e) => {
-            void handleResizeStart('left', e, isPanelExpanded)
-          }}
-          onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
-        >
-          <span
-            className={`w-[5px] ${isPanelExpanded ? 'h-14' : 'h-8'} rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
-              hoveredResizeEdge === 'left' || activeResizeEdge === 'left' ? 'opacity-95' : 'opacity-0'
-            }`}
-          />
-        </div>
-        <div
-          ref={rightRailRef}
-          className="absolute inset-y-0 -right-3 w-3 flex items-center justify-center cursor-ew-resize z-20"
-          style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-          onMouseEnter={() => setHoveredResizeEdge('right')}
-          onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'right' ? null : prev))}
-          onMouseDown={(e) => {
-            void handleResizeStart('right', e, isPanelExpanded)
-          }}
-          onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
-        >
-          <span
-            className={`w-[5px] ${isPanelExpanded ? 'h-14' : 'h-8'} rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
-              hoveredResizeEdge === 'right' || activeResizeEdge === 'right' ? 'opacity-95' : 'opacity-0'
-            }`}
-          />
-        </div>
-        {showBottomResizeRail && (
-          <div
-            ref={bottomRailRef}
-            className="absolute -bottom-5 left-1/2 -translate-x-1/2 h-5 w-36 flex items-start justify-center cursor-ns-resize z-20"
-            style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-            onMouseEnter={() => setHoveredResizeEdge('bottom')}
-            onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'bottom' ? null : prev))}
-            onMouseDown={(e) => {
-              void handleResizeStart('bottom', e, isPanelExpanded)
-            }}
-            onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
-          >
-            <span
-              className={`mt-1 h-[5px] w-14 rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
-                hoveredResizeEdge === 'bottom' || activeResizeEdge === 'bottom' ? 'opacity-95' : 'opacity-0'
-              }`}
-            />
-          </div>
-        )}
-
-        {/* X Button - dedicated hit wrapper for stable hover/click */}
-        {showX && (
-          <div
-            onMouseEnter={() => {
-              clearHideXTimer()
-              setIsHoveringX(true)
-            }}
-            onMouseLeave={() => setIsHoveringX(false)}
-            className="absolute -top-3 -right-3 z-20 w-8 h-8 pointer-events-auto flex items-center justify-center"
-            style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-          >
-            <button
-              type="button"
-              onClick={handleClear}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white/70 hover:text-white transition-all"
-              style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {/* Panel Container */}
-        <div
-          className={`relative z-[1] rounded-2xl overflow-hidden flex flex-col ${isPanelExpanded ? 'h-full' : ''}`}
-          style={{
-            background: stealthEnabled ? '#18171c80' : '#18171ccc',
-            boxShadow: '0 0 0 1px rgba(207,226,255,0.24), 0 -0.5px 0 0 rgba(255,255,255,0.8)',
-          }}
-        >
-
+  const panelBody = (
+    <>
           {/* Tab Bar - visible when panel is expanded (recording or has responses) */}
           {isPanelExpanded && (
             <div className="flex px-4 border-b border-white/10 shrink-0">
@@ -1432,6 +1282,224 @@ export function OverlayWindow() {
             </div>
 
           </div>
+    </>
+  )
+
+  if (notch) {
+    return (
+      <div
+        className="fixed inset-0 bg-transparent pointer-events-none"
+        style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+      >
+        <div
+          ref={notificationRef}
+          className="absolute right-4 flex flex-col gap-2 z-[80] pointer-events-none"
+          style={{ top: safeInsets.top + 12 }}
+        >
+          <AnimatePresence>
+            {notifications.map(n => (
+              <OverlayNotification key={n.id} notification={n} onDismiss={dismissNotification} />
+            ))}
+          </AnimatePresence>
+        </div>
+
+        <NotchIsland
+          notch={notch}
+          shellRef={panelWrapperRef}
+          isRecording={isRecording}
+          isStarting={isStarting}
+          stealthEnabled={stealthEnabled}
+          incognitoMode={incognitoMode}
+          expanded={isPanelExpanded}
+          attention={notchAttention}
+          onToggleRecording={handleToggleRecording}
+          onToggleStealth={handleToggleStealth}
+          onToggleIncognito={handleToggleIncognito}
+          onHide={handleHide}
+          onOpenDashboard={() => { void window.raven.windowShowDashboard() }}
+        >
+          {panelBody}
+        </NotchIsland>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-transparent pointer-events-none"
+      style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+    >
+    {/* Notification area - top right */}
+    <div
+      ref={notificationRef}
+      className="absolute top-4 right-4 flex flex-col gap-2 z-[80] pointer-events-none"
+    >
+      <AnimatePresence>
+        {notifications.map(n => (
+          <OverlayNotification key={n.id} notification={n} onDismiss={dismissNotification} />
+        ))}
+      </AnimatePresence>
+    </div>
+
+    {/* Main panel - bottom right, draggable */}
+    <div
+      ref={panelColumnRef}
+      className="absolute flex flex-col p-4 pb-6 bg-transparent pointer-events-none"
+      style={{
+        WebkitAppRegion: 'no-drag',
+        rowGap: '10px',
+        paddingTop: stealthEnabled ? '3.4rem' : '2.75rem',
+        bottom: `${panelBottom}px`,
+        right: `${panelRight}px`,
+        width: `${panelWidth}px`,
+        ...(panelHeight ? { height: `${panelHeight}px` } : {}),
+        maxHeight: `calc(100vh - ${safeInsets.top + safeInsets.bottom + 40}px)`,
+      } as CSSProperties}
+    >
+      {/* Controller Pill - Centered */}
+      <div
+        ref={pillWrapperRef}
+        className="relative z-[70] w-fit self-center pointer-events-auto"
+        style={{
+          WebkitAppRegion: 'drag',
+          transform: stealthEnabled ? 'translateY(-10px)' : 'translateY(0)'
+        } as CSSProperties}
+      >
+        <ControllerPill
+          stealthEnabled={stealthEnabled}
+          isRecording={isRecording}
+          isStarting={isStarting}
+          incognitoMode={incognitoMode}
+          onToggleRecording={handleToggleRecording}
+          onToggleStealth={handleToggleStealth}
+          onToggleIncognito={handleToggleIncognito}
+          onHide={handleHide}
+          onLogoClick={handleLogoClick}
+          onLogoMouseDown={handleLogoMouseDown}
+        />
+      </div>
+
+      {/* Main Panel Wrapper */}
+      <div
+        ref={panelWrapperRef}
+        className={`relative pointer-events-auto ${isPanelExpanded ? 'flex-1 min-h-0' : ''}`}
+        style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+        onMouseEnter={handlePanelMouseEnter}
+        onMouseLeave={handlePanelMouseLeave}
+      >
+        {stealthEnabled && (
+          <div
+            className="absolute -inset-[10px] pointer-events-none z-[2] p-[0.6px]"
+            aria-hidden="true"
+          >
+            <svg className="w-full h-full overflow-visible">
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="16"
+                ry="16"
+                fill="none"
+                stroke="rgba(118, 126, 142, 0.92)"
+                strokeWidth="1.4"
+                strokeDasharray="14 9"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          </div>
+        )}
+
+        {/* Resize handles (side handles always available; bottom shown only with content) */}
+        <div
+          ref={leftRailRef}
+          className="absolute inset-y-0 -left-3 w-3 flex items-center justify-center cursor-ew-resize z-20"
+          style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+          onMouseEnter={() => setHoveredResizeEdge('left')}
+          onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'left' ? null : prev))}
+          onMouseDown={(e) => {
+            void handleResizeStart('left', e, isPanelExpanded)
+          }}
+          onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
+        >
+          <span
+            className={`w-[5px] ${isPanelExpanded ? 'h-14' : 'h-8'} rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
+              hoveredResizeEdge === 'left' || activeResizeEdge === 'left' ? 'opacity-95' : 'opacity-0'
+            }`}
+          />
+        </div>
+        <div
+          ref={rightRailRef}
+          className="absolute inset-y-0 -right-3 w-3 flex items-center justify-center cursor-ew-resize z-20"
+          style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+          onMouseEnter={() => setHoveredResizeEdge('right')}
+          onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'right' ? null : prev))}
+          onMouseDown={(e) => {
+            void handleResizeStart('right', e, isPanelExpanded)
+          }}
+          onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
+        >
+          <span
+            className={`w-[5px] ${isPanelExpanded ? 'h-14' : 'h-8'} rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
+              hoveredResizeEdge === 'right' || activeResizeEdge === 'right' ? 'opacity-95' : 'opacity-0'
+            }`}
+          />
+        </div>
+        {showBottomResizeRail && (
+          <div
+            ref={bottomRailRef}
+            className="absolute -bottom-5 left-1/2 -translate-x-1/2 h-5 w-36 flex items-start justify-center cursor-ns-resize z-20"
+            style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+            onMouseEnter={() => setHoveredResizeEdge('bottom')}
+            onMouseLeave={() => setHoveredResizeEdge((prev) => (prev === 'bottom' ? null : prev))}
+            onMouseDown={(e) => {
+              void handleResizeStart('bottom', e, isPanelExpanded)
+            }}
+            onDoubleClick={() => { void handleResizeDoubleClick(isPanelExpanded) }}
+          >
+            <span
+              className={`mt-1 h-[5px] w-14 rounded-full bg-[#8f95a0] transition-opacity duration-150 ${
+                hoveredResizeEdge === 'bottom' || activeResizeEdge === 'bottom' ? 'opacity-95' : 'opacity-0'
+              }`}
+            />
+          </div>
+        )}
+
+        {/* X Button - dedicated hit wrapper for stable hover/click */}
+        {showX && (
+          <div
+            onMouseEnter={() => {
+              clearHideXTimer()
+              setIsHoveringX(true)
+            }}
+            onMouseLeave={() => setIsHoveringX(false)}
+            className="absolute -top-3 -right-3 z-20 w-8 h-8 pointer-events-auto flex items-center justify-center"
+            style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+          >
+            <button
+              type="button"
+              onClick={handleClear}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white/70 hover:text-white transition-all"
+              style={{ WebkitAppRegion: 'no-drag' } as CSSProperties}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Panel Container */}
+        <div
+          className={`relative z-[1] rounded-2xl overflow-hidden flex flex-col ${isPanelExpanded ? 'h-full' : ''}`}
+          style={{
+            background: stealthEnabled ? '#18171c80' : '#18171ccc',
+            boxShadow: '0 0 0 1px rgba(207,226,255,0.24), 0 -0.5px 0 0 rgba(255,255,255,0.8)',
+          }}
+        >
+
+          {panelBody}
         </div>
       </div>
     </div>
